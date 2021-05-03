@@ -14,10 +14,6 @@ type (
 		minimize(ccfpq.Grammar, Graph, []Query, []Edge) Graph
 	}
 
-	// An Edge keeps track of AugItems where it appears
-	Edge interface {
-	}
-
 	// A Graph is a set of Edges
 	Graph interface {
 	}
@@ -31,4 +27,28 @@ type (
 		vertex ds.Vertex
 		symbol ds.Vertex
 	}
+
+	itemPos struct {
+		item AugItem
+		pos  int
+	}
+
+	// An Edge keeps track of AugItems where it appears
+	Edge struct {
+		s, X, o      ds.Vertex
+		isNecessary  bool
+		dependencies []itemPos
+		exists       bool
+	}
 )
+
+func newEdge(s, X, o ds.Vertex) *Edge {
+	return &Edge{
+		s:            s,
+		X:            X,
+		o:            o,
+		isNecessary:  false,
+		dependencies: nil,
+		exists:       false,
+	}
+}
