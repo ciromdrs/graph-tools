@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestNewEdge(t *testing.T) {
+func TestEdge(t *testing.T) {
 	s := ds.NewSimpleVertex("s")
 	p := ds.NewSimpleVertex("p")
 	o := ds.NewSimpleVertex("o")
@@ -18,5 +18,19 @@ func TestNewEdge(t *testing.T) {
 	}
 	if e.dependencies != nil {
 		t.Fatalf("New edges should have no dependencies.")
+	}
+}
+
+func TestAugItem(t *testing.T) {
+	S := ds.NewSimpleVertex("S")
+	a := ds.NewSimpleVertex("a")
+	b := ds.NewSimpleVertex("b")
+	c := ds.NewSimpleVertex("c")
+	item := newAugItem(S, []ds.Vertex{a, b, c})
+	if item.lhs != S {
+		t.Fatalf("Wrong lhs. Expected %v, got %v", S, item.lhs)
+	}
+	if item.rhs[0] != a || item.rhs[1] != b || item.rhs[2] != c {
+		t.Fatalf("Wrong rhs. Expected %v %v %v, got %v", a, b, c, item.rhs)
 	}
 }

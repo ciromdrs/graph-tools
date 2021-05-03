@@ -18,8 +18,11 @@ type (
 	Graph interface {
 	}
 
-	// An AugItem is an augmented trace item for solving the FLGM proble
-	AugItem interface {
+	// An AugItem is an augmented trace item for solving the FLGM problem
+	AugItem struct {
+		lhs   ds.Vertex
+		rhs   []ds.Vertex
+		edges [][]*Edge
 	}
 
 	// A Query is a pair (vertex, symbol)
@@ -50,5 +53,13 @@ func newEdge(s, X, o ds.Vertex) *Edge {
 		isNecessary:  false,
 		dependencies: nil,
 		exists:       false,
+	}
+}
+
+func newAugItem(lhs ds.Vertex, rhs []ds.Vertex) *AugItem {
+	return &AugItem{
+		lhs:   lhs,
+		rhs:   rhs,
+		edges: nil,
 	}
 }
