@@ -26,6 +26,10 @@ func TestAugItem(t *testing.T) {
 	a := ds.NewSimpleVertex("a")
 	b := ds.NewSimpleVertex("b")
 	c := ds.NewSimpleVertex("c")
+	s := ds.NewSimpleVertex("s")
+	o := ds.NewSimpleVertex("o")
+	e1 := newEdge(s, a, o)
+
 	item := newAugItem(S, []ds.Vertex{a, b, c})
 	if item.lhs != S {
 		t.Fatalf("Wrong lhs. Expected %v, got %v", S, item.lhs)
@@ -35,5 +39,15 @@ func TestAugItem(t *testing.T) {
 	}
 	if len(item.edges) < 3 {
 		t.Fatalf("Expected edges of length 3, got %v", len(item.edges))
+	}
+
+	e1.exists = true
+	item.addEdge(e1, 0)
+	if item.edges[0][0] != e1 {
+		t.Fatalf("Eror adding edge. Expected %v, got %v", e1, item.edges[0][0])
+	}
+	if e1.dependencies[0].item != item || e1.dependencies[0].pos != 0 {
+		t.Fatalf("Eror adding dependency. Expected %v, got %v",
+			itemPos{item: item, pos: 0}, e1.dependencies[0])
 	}
 }

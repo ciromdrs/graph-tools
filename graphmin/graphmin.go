@@ -4,6 +4,7 @@ package graphmin
 Minimization (FLGM) problem */
 
 import (
+	"fmt"
 	"github.com/ciromdrs/graph-tools/ccfpq"
 	ds "github.com/ciromdrs/graph-tools/data_structures"
 )
@@ -32,7 +33,7 @@ type (
 	}
 
 	itemPos struct {
-		item AugItem
+		item *AugItem
 		pos  int
 	}
 
@@ -56,6 +57,10 @@ func newEdge(s, X, o ds.Vertex) *Edge {
 	}
 }
 
+func (e *Edge) addDependency(item *AugItem, pos int) {
+	e.dependencies = append(e.dependencies, itemPos{item: item, pos: pos})
+}
+
 func newAugItem(lhs ds.Vertex, rhs []ds.Vertex) *AugItem {
 	edges := make([][]*Edge, len(rhs))
 	return &AugItem{
@@ -63,4 +68,16 @@ func newAugItem(lhs ds.Vertex, rhs []ds.Vertex) *AugItem {
 		rhs:   rhs,
 		edges: edges,
 	}
+}
+
+func (item *AugItem) addEdge(e *Edge, pos int) {
+	if !e.exists {
+		panic(fmt.Sprintf("Edge %v does not exist.", e))
+	}
+	if !e.X.Equals(item.rhs[pos]) {
+		panic(fmt.Sprintf("Wrong predicate. Expected %v, got %v.",
+			item.rhs[pos], e.X))
+	}
+	item.edges[pos] = append(item.edges[pos], e)
+	e.addDependency(item, pos)
 }
