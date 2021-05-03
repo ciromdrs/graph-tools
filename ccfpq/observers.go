@@ -1,7 +1,7 @@
 package ccfpq
 
 import (
-	ds "github.com/ciromoraismedeiros/graph-tools/data_structures"
+	ds "github.com/ciromdrs/graph-tools/data_structures"
 )
 
 type (

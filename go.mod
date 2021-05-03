@@ -1,3 +1,3 @@
-module github.com/ciromoraismedeiros/graph-tools
+module github.com/ciromdrs/graph-tools
 
 go 1.14

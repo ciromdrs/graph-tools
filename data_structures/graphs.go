@@ -2,7 +2,7 @@ package data_structures
 
 import (
 	"fmt"
-	"github.com/ciromoraismedeiros/graph-tools/util"
+	"github.com/ciromdrs/graph-tools/util"
 	"io/ioutil"
 	"strings"
 )
