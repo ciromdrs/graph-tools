@@ -2,8 +2,8 @@ package ccfpq
 
 import (
 	"fmt"
+	ds "github.com/ciromoraismedeiros/graph-tools/data_structures"
 	"os"
-	ds "rdf-ccfpq/go/data_structures"
 	"strconv"
 	"testing"
 )
