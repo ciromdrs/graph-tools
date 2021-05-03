@@ -57,9 +57,10 @@ func newEdge(s, X, o ds.Vertex) *Edge {
 }
 
 func newAugItem(lhs ds.Vertex, rhs []ds.Vertex) *AugItem {
+	edges := make([][]*Edge, len(rhs))
 	return &AugItem{
 		lhs:   lhs,
 		rhs:   rhs,
-		edges: nil,
+		edges: edges,
 	}
 }

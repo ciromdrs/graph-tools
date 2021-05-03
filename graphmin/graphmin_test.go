@@ -33,4 +33,7 @@ func TestAugItem(t *testing.T) {
 	if item.rhs[0] != a || item.rhs[1] != b || item.rhs[2] != c {
 		t.Fatalf("Wrong rhs. Expected %v %v %v, got %v", a, b, c, item.rhs)
 	}
+	if len(item.edges) < 3 {
+		t.Fatalf("Expected edges of length 3, got %v", len(item.edges))
+	}
 }
