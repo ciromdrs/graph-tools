@@ -17,7 +17,7 @@ func TestSliceEngine(t *testing.T) {
 }
 
 func testDatabases(t *testing.T, factorytype string) {
-	script, err := os.Open("script.csv")
+	script, err := os.Open("testdata/script.csv")
 	if err != nil {
 		t.Fatal(err)
 	}
