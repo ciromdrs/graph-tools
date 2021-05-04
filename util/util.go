@@ -21,9 +21,10 @@ func GetTime() (int64, int64) {
 	return r.Utime.Nano(), r.Stime.Nano()
 }
 
-func Assert(b bool, msg string) {
+// Assert asserts b is true, and fails otherwise
+func Assert(t *testing.T, b bool, msg string) {
 	if !b {
-		fmt.Println("Assertion error:", msg)
+		t.Fatalf(msg)
 	}
 }
 

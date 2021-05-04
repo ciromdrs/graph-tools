@@ -2,6 +2,7 @@ package datastructures
 
 import (
 	"fmt"
+	. "github.com/ciromdrs/graph-tools/util"
 	"os"
 	"strconv"
 	"testing"
@@ -18,12 +19,6 @@ func TestMain(m *testing.M) {
 	code := m.Run()
 	os.Exit(code)
 }
-
-// func testFactory(t *testing.T, f Factory) {
-// 	testSet(f)
-// 	f.Reset()
-// 	testGraph(f)
-// }
 
 func TestSliceMap(t *testing.T) {
 	slf.Reset()
@@ -90,12 +85,12 @@ func testMap(t *testing.T, f Factory) {
 func testSet(t *testing.T, f Factory) {
 	A := f.NewSet()
 	one := f.NewVertex("1")
-	assert(A.Size() == 0, "Empty set should have Size 0", t)
-	assert(!A.Contains(one), "Empty set should not contain 1.", t)
+	Assert(t, A.Size() == 0, "Empty set should have Size 0")
+	Assert(t, !A.Contains(one), "Empty set should not contain 1.")
 
 	A.Add(one)
-	assert(A.Size() == 1, "A.Size() != 1", t)
-	assert(A.Contains(one), "A should contain 1.", t)
+	Assert(t, A.Size() == 1, "A.Size() != 1")
+	Assert(t, A.Contains(one), "A should contain 1.")
 
 	two := f.NewVertex("2")
 	three := f.NewVertex("3")
@@ -103,19 +98,19 @@ func testSet(t *testing.T, f Factory) {
 	A.Add(two)
 	A.Add(three)
 	A.Add(four)
-	assert(A.Size() == 4, "A.Size() != 4", t)
+	Assert(t, A.Size() == 4, "A.Size() != 4")
 
 	B := f.NewSet()
 	B.Add(one)
 	B.Add(two)
 	B.Add(three)
 	B.Add(four)
-	assert(A.Equals(B), "A should be equal to B.", t)
+	Assert(t, A.Equals(B), "A should be equal to B.")
 
 	A.Remove(four)
-	assert(A.Size() == 3, "A.Size() != 3", t)
-	assert(!A.Contains(four), "A should not contain 4.", t)
-	assert(!A.Equals(B), "A should be different from B.", t)
+	Assert(t, A.Size() == 3, "A.Size() != 3")
+	Assert(t, !A.Contains(four), "A should not contain 4.")
+	Assert(t, !A.Equals(B), "A should be different from B.")
 }
 
 func testGraph(t *testing.T, f Factory) {
@@ -124,27 +119,27 @@ func testGraph(t *testing.T, f Factory) {
 	p := f.NewPredicate("p")
 	o := f.NewVertex("o")
 
-	assert(g.Size() == 0, "g.Size() != 0", t)
-	assert(!g.Contains(s, p, o), "g should not contain (s,p,o).", t)
+	Assert(t, g.Size() == 0, "g.Size() != 0")
+	Assert(t, !g.Contains(s, p, o), "g should not contain (s,p,o).")
 
 	g.Add(s, p, o)
-	assert(g.Size() == 1, "g.Size() != 1", t)
-	assert(g.VSize() == 2, fmt.Sprintln("g.VSize() ", (g.VSize()), " != 2"), t)
-	assert(g.ESize() == 1, "g.ESize() != 1", t)
-	assert(g.Contains(s, p, o), "g should contain (s,p,o).", t)
-	assert(!g.Contains(o, p, s), "g should not contain (o,p,s).", t)
+	Assert(t, g.Size() == 1, "g.Size() != 1")
+	Assert(t, g.VSize() == 2, fmt.Sprintln("g.VSize() ", (g.VSize()), " != 2"))
+	Assert(t, g.ESize() == 1, "g.ESize() != 1")
+	Assert(t, g.Contains(s, p, o), "g should contain (s,p,o).")
+	Assert(t, !g.Contains(o, p, s), "g should not contain (o,p,s).")
 	g.Add(o, p, s)
-	assert(g.Contains(o, p, s), "g should contain (o,p,s).", t)
+	Assert(t, g.Contains(o, p, s), "g should contain (o,p,s).")
 
 	o2 := f.NewVertex("o2")
 	g.Add(s, p, o2)
-	assert(g.VSize() == 3, "g.VSize() != 3", t)
+	Assert(t, g.VSize() == 3, "g.VSize() != 3")
 	set := f.NewVertexSet()
 	set.Add(o2)
 	set.Add(o)
 	res := f.NewVertexSet()
 	ChanToSet(g.Objects(s, p), res)
-	assert(res.Equals(set), "Wrong objects for (s,p).", t)
+	Assert(t, res.Equals(set), "Wrong objects for (s,p).")
 
 	{
 		pairs := [][2]Vertex{
@@ -153,7 +148,7 @@ func testGraph(t *testing.T, f Factory) {
 			{o, s},
 		}
 		res := ChanToPairs(g.SubjectObjects(p))
-		assert(len(res) == len(pairs), "len(g.SubjectObjects(*p)) != len(pairs).", t)
+		Assert(t, len(res) == len(pairs), "len(g.SubjectObjects(*p)) != len(pairs).")
 		equalPairs := true
 		for _, p1 := range pairs {
 			in := false
@@ -162,16 +157,16 @@ func testGraph(t *testing.T, f Factory) {
 			}
 			equalPairs = equalPairs && in
 		}
-		assert(equalPairs, "Wrong (subject,object) pairs for p.", t)
+		Assert(t, equalPairs, "Wrong (subject,object) pairs for p.")
 	}
 
 	{
 		all := f.NewVertexSet()
 		all.Add(s)
 		all.Add(o)
-		assert(!all.Equals(g.AllNodes()), "o2 should not be in AllNodes.", t)
+		Assert(t, !all.Equals(g.AllNodes()), "o2 should not be in AllNodes.")
 		all.Add(o2)
-		assert(all.Equals(g.AllNodes()), "Wrong nodes.", t)
+		Assert(t, all.Equals(g.AllNodes()), "Wrong nodes.")
 	}
 
 	{
@@ -181,7 +176,7 @@ func testGraph(t *testing.T, f Factory) {
 			{o, p, s},
 		}
 		res := ChanToTriples(g.Iterate())
-		assert(len(res) == len(triples), "len(g.Iterate()) != len(triples).", t)
+		Assert(t, len(res) == len(triples), "len(g.Iterate()) != len(triples).")
 		equal := true
 		for _, t1 := range triples {
 			in := false
@@ -190,7 +185,7 @@ func testGraph(t *testing.T, f Factory) {
 			}
 			equal = equal && in
 		}
-		assert(equal, "Wrong triples in g.", t)
+		Assert(t, equal, "Wrong triples in g.")
 	}
 
 	{
@@ -199,19 +194,19 @@ func testGraph(t *testing.T, f Factory) {
 		subjs.Add(o)
 		res := f.NewVertexSet()
 		ChanToSet(g.AllSubjects(), res)
-		assert(res.Equals(subjs), "Wrong subjects.", t)
+		Assert(t, res.Equals(subjs), "Wrong subjects.")
 	}
 
 	p2 := f.NewPredicate("p2")
 	g.Add(s, p2, o)
 	{
-		assert(g.ESize() == 2, "g.ESize() != 2", t)
+		Assert(t, g.ESize() == 2, "g.ESize() != 2")
 		preds := f.NewVertexSet()
 		preds.Add(p)
 		preds.Add(p2)
 		res := f.NewVertexSet()
 		ChanToSet(g.Predicates(s), res)
-		assert(res.Equals(preds), "Wrong predicates.", t)
+		Assert(t, res.Equals(preds), "Wrong predicates.")
 	}
 
 	{
@@ -220,12 +215,6 @@ func testGraph(t *testing.T, f Factory) {
 			v := f.NewVertex(strconv.Itoa(i))
 			set.Add(v)
 		}
-		assert(set.Size() == CELL_SIZE*2, "set.Size() != CELL_SIZE*2", t)
-	}
-}
-
-func assert(condition bool, errmsg string, t *testing.T) {
-	if !condition {
-		t.Fatalf(errmsg)
+		Assert(t, set.Size() == CELL_SIZE*2, "set.Size() != CELL_SIZE*2")
 	}
 }
