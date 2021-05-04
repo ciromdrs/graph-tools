@@ -2,7 +2,7 @@ package ccfpq
 
 import (
 	"fmt"
-	ds "github.com/ciromdrs/graph-tools/data_structures"
+	ds "github.com/ciromdrs/graph-tools/datastructures"
 	"github.com/ciromdrs/graph-tools/util"
 	"io/ioutil"
 	"os"

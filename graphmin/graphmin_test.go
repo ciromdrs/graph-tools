@@ -1,7 +1,7 @@
 package graphmin
 
 import (
-	ds "github.com/ciromdrs/graph-tools/data_structures"
+	ds "github.com/ciromdrs/graph-tools/datastructures"
 	"testing"
 )
 

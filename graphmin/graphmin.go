@@ -6,7 +6,7 @@ Minimization (FLGM) problem */
 import (
 	"fmt"
 	"github.com/ciromdrs/graph-tools/ccfpq"
-	ds "github.com/ciromdrs/graph-tools/data_structures"
+	ds "github.com/ciromdrs/graph-tools/datastructures"
 )
 
 type (

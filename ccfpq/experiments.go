@@ -3,7 +3,7 @@ package ccfpq
 import (
 	"encoding/csv"
 	"fmt"
-	ds "github.com/ciromdrs/graph-tools/data_structures"
+	ds "github.com/ciromdrs/graph-tools/datastructures"
 	"io"
 	"log"
 	"os"

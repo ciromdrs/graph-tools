@@ -1,8 +1,7 @@
-package ccfpq
+package datastructures
 
 import (
-	"encoding/csv"
-	ds "github.com/ciromdrs/graph-tools/datastructures"
+	"fmt"
 	"os"
 	"strconv"
 	"testing"
@@ -61,7 +60,7 @@ func testMap(t *testing.T, f Factory) {
 	zero := f.NewVertex("0")
 
 	A.Set(0, zero)
-	if got := A.Get(0).(ds.Vertex); !got.Equals(zero) {
+	if got := A.Get(0).(Vertex); !got.Equals(zero) {
 		t.Fatalf("A should contain 0.")
 	}
 
@@ -82,7 +81,7 @@ func testMap(t *testing.T, f Factory) {
 	B.Set(1, one)
 	B.Set(2, two)
 	for kv := range A.Iterate() {
-		if !B.Get(kv.Key).(ds.Vertex).Equals(kv.Value.(ds.Vertex)) {
+		if !B.Get(kv.Key).(Vertex).Equals(kv.Value.(Vertex)) {
 			t.Fatalf("A != B")
 		}
 	}
@@ -144,16 +143,16 @@ func testGraph(t *testing.T, f Factory) {
 	set.Add(o2)
 	set.Add(o)
 	res := f.NewVertexSet()
-	ds.ChanToSet(g.Objects(s, p), res)
+	ChanToSet(g.Objects(s, p), res)
 	assert(res.Equals(set), "Wrong objects for (s,p).", t)
 
 	{
-		pairs := [][2]ds.Vertex{
+		pairs := [][2]Vertex{
 			{s, o},
 			{s, o2},
 			{o, s},
 		}
-		res := ds.ChanToPairs(g.SubjectObjects(p))
+		res := ChanToPairs(g.SubjectObjects(p))
 		assert(len(res) == len(pairs), "len(g.SubjectObjects(*p)) != len(pairs).", t)
 		equalPairs := true
 		for _, p1 := range pairs {
@@ -176,12 +175,12 @@ func testGraph(t *testing.T, f Factory) {
 	}
 
 	{
-		triples := [][3]ds.Vertex{
+		triples := [][3]Vertex{
 			{s, p, o},
 			{s, p, o2},
 			{o, p, s},
 		}
-		res := ds.ChanToTriples(g.Iterate())
+		res := ChanToTriples(g.Iterate())
 		assert(len(res) == len(triples), "len(g.Iterate()) != len(triples).", t)
 		equal := true
 		for _, t1 := range triples {
@@ -199,7 +198,7 @@ func testGraph(t *testing.T, f Factory) {
 		subjs.Add(s)
 		subjs.Add(o)
 		res := f.NewVertexSet()
-		ds.ChanToSet(g.AllSubjects(), res)
+		ChanToSet(g.AllSubjects(), res)
 		assert(res.Equals(subjs), "Wrong subjects.", t)
 	}
 
@@ -211,17 +210,17 @@ func testGraph(t *testing.T, f Factory) {
 		preds.Add(p)
 		preds.Add(p2)
 		res := f.NewVertexSet()
-		ds.ChanToSet(g.Predicates(s), res)
+		ChanToSet(g.Predicates(s), res)
 		assert(res.Equals(preds), "Wrong predicates.", t)
 	}
 
 	{
 		set := f.NewVertexSet()
-		for i := 0; i < ds.CELL_SIZE*2; i++ {
+		for i := 0; i < CELL_SIZE*2; i++ {
 			v := f.NewVertex(strconv.Itoa(i))
 			set.Add(v)
 		}
-		assert(set.Size() == ds.CELL_SIZE*2, "set.Size() != CELL_SIZE*2", t)
+		assert(set.Size() == CELL_SIZE*2, "set.Size() != CELL_SIZE*2", t)
 	}
 }
 

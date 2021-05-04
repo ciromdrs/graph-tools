@@ -2,13 +2,13 @@ package ccfpq
 
 import (
 	"fmt"
-	ds "github.com/ciromdrs/graph-tools/data_structures"
 	"strconv"
 )
 
 const (
 	SIMPLE_FACTORY = "simple_factory"
 	SLICE_FACTORY  = "slice_factory"
+	ds "github.com/ciromdrs/graph-tools/datastructures"
 )
 
 var f Factory
