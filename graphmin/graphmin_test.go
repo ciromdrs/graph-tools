@@ -1,7 +1,9 @@
 package graphmin
 
 import (
+	"fmt"
 	ds "github.com/ciromdrs/graph-tools/datastructures"
+	. "github.com/ciromdrs/graph-tools/util"
 	"testing"
 )
 
@@ -41,6 +43,8 @@ func TestAugItem(t *testing.T) {
 		t.Fatalf("Expected edges of length 3, got %v", len(item.edges))
 	}
 
+	AssertPanic(t, func() { item.addEdge(e1, 0) },
+		fmt.Sprintf("Should not add inexistent edge %v.", e1))
 	e1.exists = true
 	item.addEdge(e1, 0)
 	if item.edges[0][0] != e1 {
@@ -50,4 +54,10 @@ func TestAugItem(t *testing.T) {
 		t.Fatalf("Eror adding dependency. Expected %v, got %v",
 			itemPos{item: item, pos: 0}, e1.dependencies[0])
 	}
+	AssertPanic(t, func() { item.addEdge(e1, 0) },
+		fmt.Sprintf("Should not add duplicated dependency %v %d.", e1, 0))
+	e2 := newEdge(s, b, o)
+	e2.exists = true
+	AssertPanic(t, func() { item.addEdge(e2, 0) },
+		"Should not add edge with wrong predicate b.")
 }

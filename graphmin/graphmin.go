@@ -58,6 +58,12 @@ func newEdge(s, X, o ds.Vertex) *Edge {
 }
 
 func (e *Edge) addDependency(item *AugItem, pos int) {
+	for _, ip := range e.dependencies {
+		if ip.item == item && ip.pos == pos {
+			panic(fmt.Sprintf("Should not add duplicated dependency "+
+				"(%v,%v).", item, pos))
+		}
+	}
 	e.dependencies = append(e.dependencies, itemPos{item: item, pos: pos})
 }
 
