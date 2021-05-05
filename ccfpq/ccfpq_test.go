@@ -9,11 +9,15 @@ import (
 )
 
 func TestSimpleEngine(t *testing.T) {
-	testDatabases(t, ds.SIMPLE_FACTORY)
+	if !testing.Short() {
+		testDatabases(t, ds.SIMPLE_FACTORY)
+	}
 }
 
 func TestSliceEngine(t *testing.T) {
-	testDatabases(t, ds.SLICE_FACTORY)
+	if !testing.Short() {
+		testDatabases(t, ds.SLICE_FACTORY)
+	}
 }
 
 func testDatabases(t *testing.T, factorytype string) {
