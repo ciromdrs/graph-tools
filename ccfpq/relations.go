@@ -22,6 +22,14 @@ type relationsSet interface {
 }
 
 /* Structs */
+
+// A TraceItem is a rule and a list of position sets. They will replace
+// Relations in future versions.
+type TraceItem struct {
+	rule   []ds.Vertex
+	posets []ds.VertexSet
+}
+
 type mapRelationsSet struct {
 	data map[ds.Vertex]map[ds.Vertex]Relation
 }
@@ -163,6 +171,22 @@ func (r *NonTerminalRelation) AddRule(startVertices ds.VertexSet, labels []ds.Ve
 
 func (r *NonTerminalRelation) IsNonTerminal() bool {
 	return true
+}
+
+// TraceItems returns TraceItem objects that represent the relation.
+func (r *NonTerminalRelation) TraceItems() []*TraceItem {
+	items := make([]*TraceItem, len(r.rules))
+	for i, rule := range r.rules {
+		start := f.NewVertexSet()
+		start.Add(r.Node())
+		var newrule []ds.Vertex
+		newrule = append(newrule, r.Label())
+		for symbol := rule.next; symbol != nil; symbol = symbol.objNodeSet.next {
+			newrule = append(newrule, symbol.predicate)
+		}
+		items[i] = NewTraceItem(start, newrule)
+	}
+	return items
 }
 
 /*  TerminalRelation Methods and Functions */
@@ -353,4 +377,34 @@ func (m *sliceRelationsSet) iterate() <-chan Relation {
 		defer close(ch)
 	}()
 	return ch
+}
+
+/* TraceItem methods and functions */
+
+// NewTraceItem returns a new TraceItem object
+func NewTraceItem(start ds.VertexSet, rule []ds.Vertex) *TraceItem {
+	ti := &TraceItem{
+		rule:   rule,
+		posets: make([]ds.VertexSet, len(rule)),
+	}
+	ti.posets[0] = start
+	for i := 1; i < len(ti.posets); i++ {
+		ti.posets[i] = f.NewVertexSet()
+	}
+	return ti
+}
+
+// Equals returns true if the trace items are equal. It checks the rule and the
+// elements in the position sets.
+func (ti *TraceItem) Equals(other *TraceItem) bool {
+	if len(ti.rule) != len(other.rule) {
+		return false
+	}
+	for i := range ti.rule {
+		if !ti.rule[i].Equals(other.rule[i]) ||
+			!ti.posets[i].Equals(other.posets[i]) {
+			return false
+		}
+	}
+	return true
 }

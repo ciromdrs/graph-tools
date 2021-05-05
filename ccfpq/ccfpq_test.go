@@ -2,7 +2,9 @@ package ccfpq
 
 import (
 	"encoding/csv"
+	"fmt"
 	ds "github.com/ciromdrs/graph-tools/datastructures"
+	. "github.com/ciromdrs/graph-tools/util"
 	"os"
 	"strconv"
 	"testing"
@@ -63,4 +65,34 @@ func testDatabases(t *testing.T, factorytype string) {
 				"got %d", grammar, graph, expected, resCount)
 		}
 	}
+}
+
+func TestNonTerminalRelation(t *testing.T) {
+	SetFactory(ds.SIMPLE_FACTORY, 0, 0)
+	x := f.NewVertex("x")
+	a := f.NewVertex("a")
+	b := f.NewVertex("b")
+	S := f.NewVertex("S")
+
+	NEW = ds.NewMapSet()
+
+	r := NewNonTerminalRelation(x, S)
+	items := r.TraceItems()
+	Assert(t, items != nil && len(items) == 0,
+		fmt.Sprintf("Wrong trace items for relation with nil rules. "+
+			"Expected empty slice, got %v.", items))
+
+	start := f.NewVertexSet()
+	start.Add(x)
+	var rule []ds.Vertex
+	rule = append(rule, S, a, S, b)
+	r.AddRule(start, rule[1:], nil)
+	want := NewTraceItem(start, rule)
+
+	items = r.TraceItems()
+	Assert(t, items != nil, "Expected non-nil TraceItems().")
+	Assert(t, len(items) == 1, fmt.Sprintf("Expected length 1, got %v.",
+		len(items)))
+	Assert(t, items[0].Equals(want),
+		fmt.Sprintf("Wrong trace item. Expected %v, got %v", want, items[0]))
 }
