@@ -140,6 +140,7 @@ func (r *NonTerminalRelation) Show() {
 	}
 }
 
+// TODO: remove G from parameters
 func (r *NonTerminalRelation) AddRule(startVertices ds.VertexSet, labels []ds.Vertex, G *Grammar) {
 	nodeSet := NewNodeSet()
 	nodeSet.new.Update(startVertices)

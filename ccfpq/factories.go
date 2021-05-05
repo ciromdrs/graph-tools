@@ -5,7 +5,7 @@ import (
 	ds "github.com/ciromdrs/graph-tools/datastructures"
 )
 
-var f Factory
+var f Factory // TODO: Encapsulate the factory in an Engine interface
 
 type (
 	Factory interface {

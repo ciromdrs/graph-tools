@@ -26,6 +26,7 @@ type (
 	}
 )
 
+// Encapsulate package variables in CFPQEngine struct
 var (
 	R   relationsSet
 	NEW ds.Set
