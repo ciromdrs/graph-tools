@@ -399,3 +399,12 @@ func (ti *TraceItem) Equals(other *TraceItem) bool {
 	}
 	return true
 }
+
+func (ti *TraceItem) Show() {
+	fmt.Print(ti.rule[0], " -> ")
+	ti.posets[0].Show()
+	for i := 1; i < len(ti.rule); i++ {
+		fmt.Print(ti.rule[i])
+		ti.posets[i].Show()
+	}
+}

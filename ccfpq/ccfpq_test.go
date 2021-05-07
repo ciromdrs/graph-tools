@@ -87,4 +87,7 @@ func TestNonTerminalRelation(t *testing.T) {
 		len(items)))
 	Assert(t, items[0].Equals(want),
 		fmt.Sprintf("Wrong trace item. Expected %v, got %v", want, items[0]))
+
+	items[0].Show()
+	fmt.Println()
 }
