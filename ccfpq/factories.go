@@ -9,6 +9,7 @@ type (
 		ds.Factory
 		NewObserversSet() observersSet
 		NewRelationsSet() relationsSet
+		NewTraceItem(ds.VertexSet, []ds.Vertex) *TraceItem
 	}
 
 	SimpleFactory struct {
@@ -33,6 +34,12 @@ func (f *SimpleFactory) NewRelationsSet() relationsSet {
 	return newMapRelationsSet(f.VSize, f.ESize)
 }
 
+// NewTraceItem returns a new TraceItem object
+func (f *SimpleFactory) NewTraceItem(start ds.VertexSet,
+	rule []ds.Vertex) *TraceItem {
+	return newTraceItem(start, rule, f)
+}
+
 /* SliceFactory Functions and Methods */
 func NewSliceFactory(VSize, ESize int) *SliceFactory {
 	slf := ds.NewSliceFactory(VSize, ESize)
@@ -49,4 +56,24 @@ func (f *SliceFactory) NewObserversSet() observersSet {
 
 func (f *SliceFactory) NewRelationsSet() relationsSet {
 	return newSliceRelationsSet(f.VSize, f.ESize)
+}
+
+// NewTraceItem returns a new TraceItem object
+func (f *SliceFactory) NewTraceItem(start ds.VertexSet,
+	rule []ds.Vertex) *TraceItem {
+	return newTraceItem(start, rule, f)
+}
+
+// newTraceItem creates a TraceItem object. It is a behavior common to Simple
+// and Slice factories
+func newTraceItem(start ds.VertexSet, rule []ds.Vertex, f Factory) *TraceItem {
+	ti := &TraceItem{
+		rule:   rule,
+		posets: make([]ds.VertexSet, len(rule)),
+	}
+	ti.posets[0] = start
+	for i := 1; i < len(ti.posets); i++ {
+		ti.posets[i] = f.NewVertexSet()
+	}
+	return ti
 }

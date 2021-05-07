@@ -186,7 +186,7 @@ func (r *NonTerminalRelation) TraceItems(f Factory) []*TraceItem {
 		for symbol := rule.next; symbol != nil; symbol = symbol.objNodeSet.next {
 			newrule = append(newrule, symbol.predicate)
 		}
-		items[i] = NewTraceItem(start, newrule, f)
+		items[i] = f.NewTraceItem(start, newrule)
 	}
 	return items
 }
@@ -384,20 +384,6 @@ func (m *sliceRelationsSet) iterate() <-chan Relation {
 }
 
 /* TraceItem methods and functions */
-
-// NewTraceItem returns a new TraceItem object
-// TODO: make it a Factory method
-func NewTraceItem(start ds.VertexSet, rule []ds.Vertex, f Factory) *TraceItem {
-	ti := &TraceItem{
-		rule:   rule,
-		posets: make([]ds.VertexSet, len(rule)),
-	}
-	ti.posets[0] = start
-	for i := 1; i < len(ti.posets); i++ {
-		ti.posets[i] = f.NewVertexSet()
-	}
-	return ti
-}
 
 // Equals returns true if the trace items are equal. It checks the rule and the
 // elements in the position sets.

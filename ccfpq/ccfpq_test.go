@@ -61,7 +61,7 @@ func testDatabases(t *testing.T, factorytype string) {
 
 func TestNonTerminalRelation(t *testing.T) {
 	f := NewFactory(ds.SIMPLE_FACTORY, 0, 0)
-    engine := NewTIEngine(nil, nil, nil, f)
+	engine := NewTIEngine(nil, nil, nil, f)
 
 	x := f.NewVertex("x")
 	a := f.NewVertex("a")
@@ -79,7 +79,7 @@ func TestNonTerminalRelation(t *testing.T) {
 	var rule []ds.Vertex
 	rule = append(rule, S, a, S, b)
 	r.AddRule(start, rule[1:], engine)
-	want := NewTraceItem(start, rule, f)
+	want := f.NewTraceItem(start, rule)
 
 	items = r.TraceItems(f)
 	Assert(t, items != nil, "Expected non-nil TraceItems().")
