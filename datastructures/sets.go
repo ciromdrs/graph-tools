@@ -45,12 +45,9 @@ func (e *NotFoundError) Error() string {
 }
 
 /* BaseSet Functions and Methods */
+// TODO: remove abstract methods
 func (s *BaseSet) Show() {
-	fmt.Print("{ ")
-	for e := range s.Iterate() {
-		fmt.Print(e, "")
-	}
-	fmt.Print("}")
+	panic("Abstract method")
 }
 
 func (s *BaseSet) Update(toAdd Set) int {
@@ -81,7 +78,7 @@ func NewMapSet() *MapSet {
 func (s *MapSet) Show() {
 	fmt.Print("{ ")
 	for e := range s.Iterate() {
-		fmt.Print(e, "")
+		fmt.Print(e, " ")
 	}
 	fmt.Print("}")
 }
@@ -90,7 +87,8 @@ func (s *MapSet) Size() int {
 	return len(s.data)
 }
 
-func (s *MapSet) Update(toAdd Set) int {
+// TODO: Remove duplicated method?
+/*func (s *MapSet) Update(toAdd Set) int {
 	count := 0
 	for e := range toAdd.Iterate() {
 		if s.Add(e) {
@@ -98,7 +96,7 @@ func (s *MapSet) Update(toAdd Set) int {
 		}
 	}
 	return count
-}
+}*/
 
 func (s *MapSet) Equals(other Set) bool {
 	s2 := other.(*MapSet)
@@ -228,4 +226,12 @@ func (s *SliceSet) Equals(other Set) bool {
 		}
 	}
 	return true
+}
+
+func (s *SliceSet) Show() {
+	fmt.Print("{ ")
+	for e := range s.Iterate() {
+		fmt.Print(e, " ")
+	}
+	fmt.Print("}")
 }

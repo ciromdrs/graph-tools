@@ -141,6 +141,7 @@ func (engine *TIEngine) BuildBaseGraph(graph ds.Graph, grammar *Grammar) ds.Grap
 	return D
 }
 
+// TODO: remove this method
 func (engine *TIEngine) AddNew(nodeSet *NodeSet) {
 	engine.NEW.Add(nodeSet)
 }

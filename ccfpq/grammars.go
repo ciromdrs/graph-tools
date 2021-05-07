@@ -30,12 +30,14 @@ func NewGrammar(f Factory) *Grammar {
 	}
 }
 
+// TODO: remove unused method AddNonTerminals
 func (g *Grammar) AddNonTerminals(nonterminals ds.VertexSet) {
 	for n := range nonterminals.Iterate() {
 		g.NonTerm.Add(n)
 	}
 }
 
+// TODO: remove unused method AddNonTerminals
 func (g *Grammar) AddNestedExpressions(exps ds.VertexSet) {
 	for n := range exps.Iterate() {
 		g.NestedExp.Add(n)

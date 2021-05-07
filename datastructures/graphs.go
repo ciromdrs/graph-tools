@@ -107,11 +107,7 @@ func (s *BaseVertexSet) Equals(other VertexSet) bool {
 }
 
 func (s *BaseVertexSet) Show() {
-	fmt.Print("{ ")
-	for v := range s.Iterate() {
-		fmt.Print(v.ToString(), " ")
-	}
-	fmt.Println("}")
+	panic("Abstract method.")
 }
 
 func (s *BaseVertexSet) Add(v Vertex) bool {
