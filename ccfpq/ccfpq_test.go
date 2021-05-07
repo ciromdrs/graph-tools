@@ -47,19 +47,11 @@ func testDatabases(t *testing.T, factorytype string) {
 			continue
 		}
 
-		G, D := QuickLoad(grammar, graph, factorytype)
+		G, D, F := QuickLoad(grammar, graph, factorytype)
 		Q := QueryAll(G, D)
-		R, _, _ := Run(D, G, Q)
-		resCount := 0
-		for _, p := range Q {
-			var node ds.Vertex
-			if super, isSuperVertex := p.node.(ds.SuperVertex); isSuperVertex {
-				node = super.Vertex
-			} else {
-				node = p.node
-			}
-			resCount += R.get(node, p.symbol).Objects().Size()
-		}
+		engine := NewTIEngine(G, D, Q, F)
+		engine.Run()
+		resCount := engine.CountResults()
 		if resCount != expected {
 			t.Errorf("Wrong results for grammar %s, graph %s: expected %d, "+
 				"got %d", grammar, graph, expected, resCount)
@@ -68,16 +60,16 @@ func testDatabases(t *testing.T, factorytype string) {
 }
 
 func TestNonTerminalRelation(t *testing.T) {
-	SetFactory(ds.SIMPLE_FACTORY, 0, 0)
+	f := NewFactory(ds.SIMPLE_FACTORY, 0, 0)
+    engine := NewTIEngine(nil, nil, nil, f)
+
 	x := f.NewVertex("x")
 	a := f.NewVertex("a")
 	b := f.NewVertex("b")
 	S := f.NewVertex("S")
 
-	NEW = ds.NewMapSet()
-
-	r := NewNonTerminalRelation(x, S)
-	items := r.TraceItems()
+	r := NewNonTerminalRelation(x, S, f)
+	items := r.TraceItems(f)
 	Assert(t, items != nil && len(items) == 0,
 		fmt.Sprintf("Wrong trace items for relation with nil rules. "+
 			"Expected empty slice, got %v.", items))
@@ -86,10 +78,10 @@ func TestNonTerminalRelation(t *testing.T) {
 	start.Add(x)
 	var rule []ds.Vertex
 	rule = append(rule, S, a, S, b)
-	r.AddRule(start, rule[1:], nil)
-	want := NewTraceItem(start, rule)
+	r.AddRule(start, rule[1:], engine)
+	want := NewTraceItem(start, rule, f)
 
-	items = r.TraceItems()
+	items = r.TraceItems(f)
 	Assert(t, items != nil, "Expected non-nil TraceItems().")
 	Assert(t, len(items) == 1, fmt.Sprintf("Expected length 1, got %v.",
 		len(items)))

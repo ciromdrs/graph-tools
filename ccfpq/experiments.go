@@ -36,7 +36,7 @@ func QueryAll(G *Grammar, D ds.Graph) []pair {
 	return Q
 }
 
-func QueryGroups(numberOfGroups int, G *Grammar, D ds.Graph) []pair {
+func QueryGroups(numberOfGroups int, G *Grammar, D ds.Graph, f Factory) []pair {
 	Q := make([]pair, numberOfGroups)
 	for i := range Q {
 		Q[i].node = f.NewSuperVertex(f.NewVertexSet())
@@ -50,35 +50,22 @@ func QueryGroups(numberOfGroups int, G *Grammar, D ds.Graph) []pair {
 	return Q
 }
 
-func RunExperiment(G *Grammar, D ds.Graph, Q []pair, expected int) {
-	resCount := 0
-
-	R, t, m := Run(D, G, Q)
-
-	for _, p := range Q {
-		var node ds.Vertex
-		if super, isSuperVertex := p.node.(ds.SuperVertex); isSuperVertex {
-			node = super.Vertex
-		} else {
-			node = p.node
-		}
-		resCount += R.get(node, p.symbol).Objects().Size()
-	}
-
+func RunExperiment(engine CFPQEngine, expected int) {
+	t, m := engine.Run()
+	resCount := engine.CountResults()
 	test_result := (resCount == expected) || (expected == NOT_APPLICABLE)
-
 	if test_result == true {
 		countok++
 	} else {
 		counterr++
 	}
-
 	mustprint := (test_result == false && printmode != PRINT_NONE) ||
 		(printmode == PRINT_ALL)
-
 	if mustprint {
-		PrintTestResults(test_result, G.Name, D.Name(), D.AllNodes().Size(),
-			int(D.Size()), resCount, expected, t, m)
+		PrintTestResults(test_result, engine.Grammar().Name,
+			engine.Graph().Name(), engine.Graph().AllNodes().Size(),
+			int(engine.Graph().Size()), resCount, expected, t, m,
+			engine.Factory().Type())
 	}
 }
 
@@ -97,16 +84,16 @@ func RunExperiments(expfile string, factoryType string) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		G, D := QuickLoad(record[0], record[1], factoryType)
+		grammar, graph, factory := QuickLoad(record[0], record[1], factoryType)
 		checksum, err := strconv.Atoi(record[2])
 		if err != nil {
 			fmt.Println(err)
 			fmt.Println("Skipping this test.")
 			continue
 		}
-		Q := QueryAll(G, D)
-		RunExperiment(G, D, Q, checksum)
-		f.Reset()
+		query := QueryAll(grammar, graph)
+		engine := NewTIEngine(grammar, graph, query, factory)
+		RunExperiment(engine, checksum)
 	}
 }
 
@@ -116,11 +103,11 @@ func bToMb(b uint64) float64 {
 
 func PrintTestResults(test_result bool, grammarname, graphname string,
 	vertices, edges, resultcount, expected int, cputime time.Duration,
-	memory uint64) {
+	memory uint64, factoryType string) {
 	fmt.Printf("%s\t%s\t%d\t%d\t%d\t%d%8.1f\t%s\n",
 		grammarname, graphname,
 		vertices, edges, resultcount, int64(cputime/time.Millisecond),
-		bToMb(memory), f.Type())
+		bToMb(memory), factoryType)
 	if test_result == false {
 		fmt.Println("\texpected:", expected)
 	}

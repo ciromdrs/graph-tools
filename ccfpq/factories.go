@@ -1,11 +1,8 @@
 package ccfpq
 
 import (
-	"fmt"
 	ds "github.com/ciromdrs/graph-tools/datastructures"
 )
-
-var f Factory // TODO: Encapsulate the factory in an Engine interface
 
 type (
 	Factory interface {
@@ -23,25 +20,13 @@ type (
 	}
 )
 
-/* BaseFactory Methods */
-func SetFactory(factoryType string, VAlloc, EAlloc int) {
-	switch factoryType {
-	case ds.SIMPLE_FACTORY:
-		f = NewSimpleFactory()
-	case ds.SLICE_FACTORY:
-		f = NewSliceFactory(VAlloc, EAlloc)
-	default:
-		panic(fmt.Sprintf("Invalid factory type %s", factoryType))
-	}
-}
-
 /* SimpleFactory Functions and Methods */
 func NewSimpleFactory() *SimpleFactory {
 	return &SimpleFactory{}
 }
 
 func (f *SimpleFactory) NewObserversSet() observersSet {
-	return newMapObserversSet(f.VSize * f.ESize)
+	return newMapObserversSet(f.VSize*f.ESize, f)
 }
 
 func (f *SimpleFactory) NewRelationsSet() relationsSet {
@@ -59,7 +44,7 @@ func NewSliceFactory(VSize, ESize int) *SliceFactory {
 }
 
 func (f *SliceFactory) NewObserversSet() observersSet {
-	return newSliceObserversSet(f.VSize, f.ESize)
+	return newSliceObserversSet(f.VSize, f.ESize, f)
 }
 
 func (f *SliceFactory) NewRelationsSet() relationsSet {

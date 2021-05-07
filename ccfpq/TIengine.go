@@ -12,6 +12,27 @@ import (
 )
 
 type (
+	// A CFPQEngine is a Context-Free Path Query evaluation engine
+	CFPQEngine interface {
+		Run() (time.Duration, uint64)
+		Graph() ds.Graph
+		Grammar() *Grammar
+		Query() []pair
+		Factory() Factory
+		CountResults() int
+	}
+
+	// TIEngine is the Trace-Item-based CFPQ evaluation engine
+	TIEngine struct {
+		graph   ds.Graph
+		grammar *Grammar
+		query   []pair
+		f       Factory
+		R       relationsSet
+		NEW     ds.Set
+		O       observersSet
+	}
+
 	NodeSet struct {
 		nodes    ds.VertexSet
 		new      ds.VertexSet
@@ -26,47 +47,40 @@ type (
 	}
 )
 
-// Encapsulate package variables in CFPQEngine struct
-var (
-	R   relationsSet
-	NEW ds.Set
-	O   observersSet
-)
-
 /* NodeSet Methods and Functions */
-func NewNodeSet() *NodeSet {
+func NewNodeSet(f Factory) *NodeSet {
 	return &NodeSet{
 		nodes: f.NewVertexSet(),
 		new:   f.NewVertexSet(),
 	}
 }
 
-func (ns *NodeSet) Mark() {
+func (ns *NodeSet) Mark(f Factory) {
 	for k := range ns.new.Iterate() {
 		ns.nodes.Add(k)
 	}
 	ns.new = f.NewVertexSet()
 }
 
-func GetOrCreate(node, label ds.Vertex, G *Grammar) Relation {
-	r := R.get(node, label)
+func (engine *TIEngine) GetOrCreate(node, label ds.Vertex, G *Grammar) Relation {
+	r := engine.R.get(node, label)
 	if r == nil {
-		if label.Equals(epsilon()) {
+		if label == nil {
 			panic("Should not create empty relations")
 			// nested expressions
 		} else if isNestedExp(label.Label()) {
-			r2 := NewNestedRelation(node, label)
+			r2 := NewNestedRelation(node, label, engine.Factory())
 			subexp := strings.TrimPrefix(label.Label(), OPEN)
 			subexp = strings.TrimSuffix(subexp, CLOSE)
-			r2.SetRule(parseExp(subexp))
+			r2.SetRule(parseExp(subexp, engine.Factory()), engine)
 			r = r2
 			// nonterminals
 		} else if G.NonTerm.Contains(label) {
-			r2 := NewNonTerminalRelation(node, label)
-			startVertices := f.NewVertexSet()
+			r2 := NewNonTerminalRelation(node, label, engine.Factory())
+			startVertices := engine.Factory().NewVertexSet()
 			startVertices.Add(node)
 			for _, rule := range G.Rules[label] {
-				r2.AddRule(startVertices, rule, G)
+				r2.AddRule(startVertices, rule, engine)
 			}
 			r = r2
 			// terminals
@@ -74,14 +88,15 @@ func GetOrCreate(node, label ds.Vertex, G *Grammar) Relation {
 			// do nothing (do not delete this if clause)
 			// expressions
 		} else {
-			r2 := NewExpressionRelation(node, label)
-			startVertices := f.NewVertexSet()
+			r2 := NewExpressionRelation(node, label, engine.Factory())
+			startVertices := engine.Factory().NewVertexSet()
 			startVertices.Add(node)
-			r2.SetRule(startVertices, parseExp(label.Label()))
+			r2.SetRule(startVertices, parseExp(label.Label(), engine.Factory()),
+				engine)
 			r = r2
 		}
 		if r != nil {
-			R.set(node, label, r) // do not add nil relations
+			engine.R.set(node, label, r) // do not add nil relations
 		}
 	}
 	return r
@@ -96,8 +111,24 @@ func newPair(node, symbol ds.Vertex) *pair {
 }
 
 /* Graph Parsing Functions */
-func BuildBaseGraph(graph ds.Graph, grammar *Grammar) ds.Graph {
-	D := f.NewGraph(graph.Name())
+
+// NewTIEngine creates a new TIEngine
+func NewTIEngine(grammar *Grammar, graph ds.Graph, query []pair,
+	factory Factory) *TIEngine {
+	engine := &TIEngine{
+		graph:   graph,
+		grammar: grammar,
+		query:   query,
+		f:       factory,
+		R:       factory.NewRelationsSet(),
+		NEW:     ds.NewMapSet(),
+		O:       factory.NewObserversSet(),
+	}
+	return engine
+}
+
+func (engine *TIEngine) BuildBaseGraph(graph ds.Graph, grammar *Grammar) ds.Graph {
+	D := engine.Factory().NewGraph(graph.Name())
 	D.SetName(graph.Name())
 	for pElem := range grammar.Alphabet.Iterate() {
 		p := pElem.(ds.Vertex)
@@ -110,24 +141,24 @@ func BuildBaseGraph(graph ds.Graph, grammar *Grammar) ds.Graph {
 	return D
 }
 
-func AddNew(nodeSet *NodeSet) {
-	NEW.Add(nodeSet)
+func (engine *TIEngine) AddNew(nodeSet *NodeSet) {
+	engine.NEW.Add(nodeSet)
 }
 
-func processNew(nodeSet *NodeSet, G *Grammar) {
+func (engine *TIEngine) processNew(nodeSet *NodeSet, G *Grammar) {
 	if symbol := nodeSet.next; symbol != nil {
 		// update symbol's object set and NEW
-		new := f.NewVertexSet()
+		new := engine.Factory().NewVertexSet()
 		for a := range nodeSet.new.Iterate() {
-			var destinations ds.VertexSet = f.NewVertexSet()
-			if symbol.predicate.Equals(epsilon()) {
-				destinations.Add(a)
+			var destinations ds.VertexSet = engine.Factory().NewVertexSet()
+			if symbol.predicate == nil {
+				panic("symbol.predicate should not be nil.")
 			} else {
-				if r := GetOrCreate(a, symbol.predicate, G); r != nil {
-					destinations = r.Objects()
+				if r := engine.GetOrCreate(a, symbol.predicate, G); r != nil {
+					destinations = r.Objects(engine.Factory())
 				}
 				if !G.Alphabet.Contains(symbol.predicate) {
-					O.add(a, symbol.predicate, symbol.objNodeSet)
+					engine.O.add(a, symbol.predicate, symbol.objNodeSet)
 				}
 			}
 			for b := range destinations.Iterate() {
@@ -138,46 +169,47 @@ func processNew(nodeSet *NodeSet, G *Grammar) {
 		}
 		if new.Size() > 0 {
 			symbol.objNodeSet.new.Update(new)
-			NEW.Add(symbol.objNodeSet)
+			engine.NEW.Add(symbol.objNodeSet)
 		}
 	} else {
 		// updates relation's objects and notifies O
-		new := f.NewVertexSet()
-		if nodeSet.relation.IsNested() && nodeSet.relation.Objects().Size() == 0 {
+		new := engine.Factory().NewVertexSet()
+		if nodeSet.relation.IsNested() &&
+			nodeSet.relation.Objects(engine.Factory()).Size() == 0 {
 			new.Add(nodeSet.relation.Node())
 		} else {
 			for a := range nodeSet.new.Iterate() {
-				if !nodeSet.relation.Objects().Contains(a) {
+				if !nodeSet.relation.Objects(engine.Factory()).Contains(a) {
 					new.Add(a)
 				}
 			}
 		}
 		if new.Size() > 0 {
 			nodeSet.relation.AddObjects(new)
-			for _, o := range O.get(nodeSet.relation.Node(),
+			for _, o := range engine.O.get(nodeSet.relation.Node(),
 				nodeSet.relation.Label()) {
 				for n := range new.Iterate() {
 					if !o.new.Contains(n) {
 						o.new.Add(n)
-						AddNew(o)
+						engine.AddNew(o)
 					}
 				}
 			}
 		}
 	}
-	nodeSet.Mark()
+	nodeSet.Mark(engine.Factory())
 }
 
-func pickAndRemove() *NodeSet {
-	for e := range NEW.Iterate() {
+func (engine *TIEngine) pickAndRemove() *NodeSet {
+	for e := range engine.NEW.Iterate() {
 		ns := e.(*NodeSet)
-		NEW.Remove(ns)
+		engine.NEW.Remove(ns)
 		return ns
 	}
 	return nil
 }
 
-func Run(D ds.Graph, G *Grammar, Q []pair) (relationsSet, time.Duration, uint64) {
+func (engine *TIEngine) Run() (time.Duration, uint64) {
 	os.Setenv("GOGC", "off")
 	// allocateMemory(15000)
 	runtime.GC()
@@ -186,21 +218,21 @@ func Run(D ds.Graph, G *Grammar, Q []pair) (relationsSet, time.Duration, uint64)
 
 	startusr, startsys := util.GetTime()
 
-	R = f.NewRelationsSet()
-	O = f.NewObserversSet()
-	NEW = ds.NewMapSet()
+	engine.R = engine.Factory().NewRelationsSet()
+	engine.O = engine.Factory().NewObserversSet()
+	engine.NEW = ds.NewMapSet()
 
 	// Creating terminal relations
-	for s := range D.AllSubjects() {
-		for p := range D.Predicates(s) {
-			objects := f.NewVertexSet()
-			ds.ChanToSet(D.Objects(s, p), objects)
-			R.set(s, p, NewTerminalRelation(s, p, objects))
+	for s := range engine.Graph().AllSubjects() {
+		for p := range engine.Graph().Predicates(s) {
+			objects := engine.Factory().NewVertexSet()
+			ds.ChanToSet(engine.Graph().Objects(s, p), objects)
+			engine.R.set(s, p, NewTerminalRelation(s, p, objects))
 		}
 	}
 
 	// Initializing non-terminal relations
-	for _, p := range Q {
+	for _, p := range engine.Query() {
 		var r *NonTerminalRelation
 		var node ds.Vertex
 		label := p.symbol
@@ -211,19 +243,19 @@ func Run(D ds.Graph, G *Grammar, Q []pair) (relationsSet, time.Duration, uint64)
 			startVertices = super.Vertices
 		} else {
 			node = p.node
-			startVertices = f.NewVertexSet()
+			startVertices = engine.Factory().NewVertexSet()
 			startVertices.Add(node)
 		}
-		r = NewNonTerminalRelation(node, label)
-		for _, rule := range G.Rules[label] {
-			r.AddRule(startVertices, rule, G)
+		r = NewNonTerminalRelation(node, label, engine.Factory())
+		for _, rule := range engine.Grammar().Rules[label] {
+			r.AddRule(startVertices, rule, engine)
 		}
-		R.set(node, label, r)
+		engine.R.set(node, label, r)
 	}
 
-	for NEW.Size() > 0 {
-		newNodeSet := pickAndRemove()
-		processNew(newNodeSet, G)
+	for engine.NEW.Size() > 0 {
+		newNodeSet := engine.pickAndRemove()
+		engine.processNew(newNodeSet, engine.Grammar())
 	}
 
 	endusr, endsys := util.GetTime()
@@ -235,15 +267,17 @@ func Run(D ds.Graph, G *Grammar, Q []pair) (relationsSet, time.Duration, uint64)
 	runtime.ReadMemStats(&endmem)
 	memory := endmem.Alloc
 	os.Setenv("GOGC", "100")
-	return R, usrtime + systime, memory
+	return usrtime + systime, memory
 }
 
-func QuickLoad(grammarfile string, graphfile string, factoryType string) (*Grammar, ds.Graph) {
+// QuickLoad instantiates a factory and loads a grammar and a graph
+func QuickLoad(grammarfile string, graphfile string,
+	factoryType string) (*Grammar, ds.Graph, Factory) {
 	graph, grammar := LoadInfo(grammarfile, graphfile)
 	VAlloc := graph.VSize()
 	EAlloc := grammar.Alphabet.Size() + grammar.NonTerm.Size() +
 		grammar.NestedExp.Size() + 1
-	SetFactory(factoryType, VAlloc, EAlloc)
+	f := NewFactory(factoryType, VAlloc, EAlloc)
 	D := f.NewGraph(graph.Name())
 	for triple := range graph.Iterate() {
 		s := f.NewVertex(triple[0].Label())
@@ -251,13 +285,13 @@ func QuickLoad(grammarfile string, graphfile string, factoryType string) (*Gramm
 		o := f.NewVertex(triple[2].Label())
 		D.Add(s, p, o)
 	}
-	G := LoadGrammar(grammarfile)
-	return G, D
+	G := LoadGrammar(grammarfile, f)
+	return G, D, f
 }
 
 func LoadInfo(grammarfile string, graphfile string) (ds.Graph, *Grammar) {
-	f = NewSimpleFactory()
-	grammar := LoadGrammar(grammarfile)
+	f := NewSimpleFactory()
+	grammar := LoadGrammar(grammarfile, f)
 	data, err := ioutil.ReadFile(graphfile)
 	if err != nil {
 		panic("Error openning file: " + graphfile + "\n")
@@ -278,4 +312,50 @@ func LoadInfo(grammarfile string, graphfile string) (ds.Graph, *Grammar) {
 		}
 	}
 	return graph, grammar
+}
+
+// NewFactory returns a new Factory object. VAlloc and EAlloc are used in the
+// SliceFactory for memory pre-allocation.
+func NewFactory(factoryType string, VAlloc, EAlloc int) Factory {
+	var f Factory
+	switch factoryType {
+	case ds.SIMPLE_FACTORY:
+		f = NewSimpleFactory()
+	case ds.SLICE_FACTORY:
+		f = NewSliceFactory(VAlloc, EAlloc)
+	default:
+		panic(fmt.Sprintf("Invalid factory type %s", factoryType))
+	}
+	return f
+}
+
+func (engine *TIEngine) Graph() ds.Graph {
+	return engine.graph
+}
+
+func (engine *TIEngine) Grammar() *Grammar {
+	return engine.grammar
+}
+
+func (engine *TIEngine) Query() []pair {
+	return engine.query
+}
+
+func (engine *TIEngine) Factory() Factory {
+	return engine.f
+}
+
+// CountResults returns the number of results for the query
+func (engine *TIEngine) CountResults() int {
+	resCount := 0
+	for _, p := range engine.Query() {
+		var node ds.Vertex
+		if super, isSuperVertex := p.node.(ds.SuperVertex); isSuperVertex {
+			node = super.Vertex
+		} else {
+			node = p.node
+		}
+		resCount += engine.R.get(node, p.symbol).Objects(engine.Factory()).Size()
+	}
+	return resCount
 }

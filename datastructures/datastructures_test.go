@@ -92,6 +92,10 @@ func testSet(t *testing.T, f Factory) {
 	Assert(t, A.Size() == 1, "A.Size() != 1")
 	Assert(t, A.Contains(one), "A should contain 1.")
 
+	Assert(t, A.Add(one) == false, "Shoud not add duplicated element.")
+	Assert(t, A.Size() == 1, "A.Size() != 1")
+	Assert(t, A.Contains(one), "A should contain 1.")
+
 	two := f.NewVertex("2")
 	three := f.NewVertex("3")
 	four := f.NewVertex("4")
@@ -107,10 +111,16 @@ func testSet(t *testing.T, f Factory) {
 	B.Add(four)
 	Assert(t, A.Equals(B), "A should be equal to B.")
 
-	A.Remove(four)
+	Assert(t, A.Remove(four) == true, "Should remove element.")
 	Assert(t, A.Size() == 3, "A.Size() != 3")
 	Assert(t, !A.Contains(four), "A should not contain 4.")
 	Assert(t, !A.Equals(B), "A should be different from B.")
+	Assert(t, A.Remove(four) == false, "Should not remove inexistent element.")
+
+	Assert(t, A.Add(four) == true, "Should add removed element.")
+	Assert(t, A.Size() == 4, "A.Size() != 4")
+	Assert(t, A.Contains(four), "A should contain 4.")
+	Assert(t, A.Equals(B), "A should be equal to B.")
 }
 
 func testGraph(t *testing.T, f Factory) {

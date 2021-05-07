@@ -9,8 +9,8 @@ import (
 type Relation interface {
 	Node() ds.Vertex
 	Label() ds.Vertex
-	Objects() ds.VertexSet
-	Show()
+	Objects(Factory) ds.VertexSet
+	Show(Factory)
 	AddObjects(ds.VertexSet)
 	IsNested() bool
 }
@@ -84,7 +84,7 @@ func (r *BaseRelation) Label() ds.Vertex {
 	return r.label
 }
 
-func (r *BaseRelation) Objects() ds.VertexSet {
+func (r *BaseRelation) Objects(f Factory) ds.VertexSet {
 	return r.objects
 }
 
@@ -92,9 +92,9 @@ func (r *BaseRelation) AddObjects(new ds.VertexSet) {
 	r.objects.Update(new)
 }
 
-func (r *BaseRelation) Show() {
+func (r *BaseRelation) Show(f Factory) {
 	fmt.Print("R(", r.Node(), ",", r.Label(), ") = {")
-	r.Objects().Show()
+	r.Objects(f).Show()
 	fmt.Println("}")
 }
 
@@ -119,7 +119,8 @@ func (r *BaseRelation) IsEmpty() bool {
 }
 
 /* NonTerminalRelation Methods and Functions */
-func NewNonTerminalRelation(node, label ds.Vertex) *NonTerminalRelation {
+func NewNonTerminalRelation(node, label ds.Vertex,
+	f Factory) *NonTerminalRelation {
 	return &NonTerminalRelation{
 		BaseRelation: BaseRelation{
 			node:    node,
@@ -130,8 +131,8 @@ func NewNonTerminalRelation(node, label ds.Vertex) *NonTerminalRelation {
 	}
 }
 
-func (r *NonTerminalRelation) Show() {
-	r.BaseRelation.Show()
+func (r *NonTerminalRelation) Show(f Factory) {
+	r.BaseRelation.Show(f)
 	fmt.Println("len(rules) =", len(r.rules))
 	for _, rule := range r.rules {
 		fmt.Print(r.label, " -> {")
@@ -148,12 +149,13 @@ func (r *NonTerminalRelation) Show() {
 	}
 }
 
-// TODO: remove G from parameters
-func (r *NonTerminalRelation) AddRule(startVertices ds.VertexSet, labels []ds.Vertex, G *Grammar) {
-	nodeSet := NewNodeSet()
+// AddRule adds a rule to a NonTerminalRelation and adds startVertices to NEW.
+func (r *NonTerminalRelation) AddRule(startVertices ds.VertexSet,
+	labels []ds.Vertex, engine *TIEngine) {
+	nodeSet := NewNodeSet(engine.Factory())
 	nodeSet.new.Update(startVertices)
 	nodeSet.relation = r
-	AddNew(nodeSet)
+	engine.AddNew(nodeSet)
 	r.rules = append(r.rules, nodeSet)
 
 	for _, label := range labels {
@@ -161,7 +163,7 @@ func (r *NonTerminalRelation) AddRule(startVertices ds.VertexSet, labels []ds.Ve
 		labelData.subjNodeSet = nodeSet
 		nodeSet.next = labelData
 
-		objects := NewNodeSet()
+		objects := NewNodeSet(engine.Factory())
 		objects.prev = labelData
 		objects.relation = r
 		labelData.objNodeSet = objects
@@ -174,7 +176,7 @@ func (r *NonTerminalRelation) IsNonTerminal() bool {
 }
 
 // TraceItems returns TraceItem objects that represent the relation.
-func (r *NonTerminalRelation) TraceItems() []*TraceItem {
+func (r *NonTerminalRelation) TraceItems(f Factory) []*TraceItem {
 	items := make([]*TraceItem, len(r.rules))
 	for i, rule := range r.rules {
 		start := f.NewVertexSet()
@@ -184,7 +186,7 @@ func (r *NonTerminalRelation) TraceItems() []*TraceItem {
 		for symbol := rule.next; symbol != nil; symbol = symbol.objNodeSet.next {
 			newrule = append(newrule, symbol.predicate)
 		}
-		items[i] = NewTraceItem(start, newrule)
+		items[i] = NewTraceItem(start, newrule, f)
 	}
 	return items
 }
@@ -206,7 +208,7 @@ func (r *TerminalRelation) IsTerminal() bool {
 }
 
 /* NestedRelation Methods and Functions */
-func NewNestedRelation(node, label ds.Vertex) *NestedRelation {
+func NewNestedRelation(node, label ds.Vertex, f Factory) *NestedRelation {
 	r := &NestedRelation{
 		BaseRelation: BaseRelation{
 			node:    node,
@@ -217,7 +219,7 @@ func NewNestedRelation(node, label ds.Vertex) *NestedRelation {
 	return r
 }
 
-func (r *NestedRelation) Objects() ds.VertexSet {
+func (r *NestedRelation) Objects(f Factory) ds.VertexSet {
 	// if the sub-relation has objects, it means its nested expression
 	// succesfully derived a path, so this should return its node.
 	o := f.NewVertexSet()
@@ -227,11 +229,11 @@ func (r *NestedRelation) Objects() ds.VertexSet {
 	return o
 }
 
-func (r *NestedRelation) SetRule(labels []ds.Vertex) {
-	nodeSet := NewNodeSet()
+func (r *NestedRelation) SetRule(labels []ds.Vertex, engine *TIEngine) {
+	nodeSet := NewNodeSet(engine.Factory())
 	nodeSet.new.Add(r.node)
 	nodeSet.relation = r
-	AddNew(nodeSet)
+	engine.AddNew(nodeSet)
 	r.rule = nodeSet
 
 	for _, label := range labels {
@@ -239,7 +241,7 @@ func (r *NestedRelation) SetRule(labels []ds.Vertex) {
 		labelData.subjNodeSet = nodeSet
 		nodeSet.next = labelData
 
-		objects := NewNodeSet()
+		objects := NewNodeSet(engine.Factory())
 		objects.prev = labelData
 		objects.relation = r
 		labelData.objNodeSet = objects
@@ -253,8 +255,8 @@ func (r *NestedRelation) SetRule(labels []ds.Vertex) {
 	}
 }
 
-func (r *NestedRelation) Show() {
-	r.BaseRelation.Show()
+func (r *NestedRelation) Show(f Factory) {
+	r.BaseRelation.Show(f)
 	fmt.Print(r.label, " -> {")
 	r.rule.nodes.Show()
 	r.rule.new.Show() // ShowNew()
@@ -273,7 +275,8 @@ func (r *NestedRelation) IsNested() bool {
 }
 
 /* ExpressionRelation Methods and Functions */
-func NewExpressionRelation(node, label ds.Vertex) *ExpressionRelation {
+func NewExpressionRelation(node, label ds.Vertex,
+	f Factory) *ExpressionRelation {
 	r := &ExpressionRelation{
 		BaseRelation: BaseRelation{
 			node:    node,
@@ -284,11 +287,12 @@ func NewExpressionRelation(node, label ds.Vertex) *ExpressionRelation {
 	return r
 }
 
-func (r *ExpressionRelation) SetRule(startVertices ds.VertexSet, labels []ds.Vertex) {
-	nodeSet := NewNodeSet()
+func (r *ExpressionRelation) SetRule(startVertices ds.VertexSet,
+	labels []ds.Vertex, engine *TIEngine) {
+	nodeSet := NewNodeSet(engine.Factory())
 	nodeSet.new.Update(startVertices)
 	nodeSet.relation = r
-	AddNew(nodeSet)
+	engine.AddNew(nodeSet)
 	r.rule = nodeSet
 
 	for _, label := range labels {
@@ -296,7 +300,7 @@ func (r *ExpressionRelation) SetRule(startVertices ds.VertexSet, labels []ds.Ver
 		labelData.subjNodeSet = nodeSet
 		nodeSet.next = labelData
 
-		objects := NewNodeSet()
+		objects := NewNodeSet(engine.Factory())
 		objects.prev = labelData
 		objects.relation = r
 		labelData.objNodeSet = objects
@@ -382,7 +386,8 @@ func (m *sliceRelationsSet) iterate() <-chan Relation {
 /* TraceItem methods and functions */
 
 // NewTraceItem returns a new TraceItem object
-func NewTraceItem(start ds.VertexSet, rule []ds.Vertex) *TraceItem {
+// TODO: make it a Factory method
+func NewTraceItem(start ds.VertexSet, rule []ds.Vertex, f Factory) *TraceItem {
 	ti := &TraceItem{
 		rule:   rule,
 		posets: make([]ds.VertexSet, len(rule)),

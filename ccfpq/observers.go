@@ -21,7 +21,7 @@ type (
 )
 
 /* mapObserversSet Methods and Functions */
-func newMapObserversSet(size int) *mapObserversSet {
+func newMapObserversSet(size int, f Factory) *mapObserversSet {
 	return &mapObserversSet{data: f.NewMap(size).(*ds.SimpleMap)}
 }
 
@@ -50,7 +50,7 @@ func (O *mapObserversSet) get(node, symbol ds.Vertex) []*NodeSet {
 }
 
 /* sliceObserversSet Methods and Functions */
-func newSliceObserversSet(VSize, ESize int) *sliceObserversSet {
+func newSliceObserversSet(VSize, ESize int, f Factory) *sliceObserversSet {
 	total := VSize * ESize
 	return &sliceObserversSet{
 		data:  f.NewMap(total).(*ds.SliceMap),
