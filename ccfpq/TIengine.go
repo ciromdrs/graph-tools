@@ -141,11 +141,6 @@ func (engine *TIEngine) BuildBaseGraph(graph ds.Graph, grammar *Grammar) ds.Grap
 	return D
 }
 
-// TODO: remove this method
-func (engine *TIEngine) AddNew(nodeSet *NodeSet) {
-	engine.NEW.Add(nodeSet)
-}
-
 func (engine *TIEngine) processNew(nodeSet *NodeSet, G *Grammar) {
 	if symbol := nodeSet.next; symbol != nil {
 		// update symbol's object set and NEW
@@ -192,7 +187,7 @@ func (engine *TIEngine) processNew(nodeSet *NodeSet, G *Grammar) {
 				for n := range new.Iterate() {
 					if !o.new.Contains(n) {
 						o.new.Add(n)
-						engine.AddNew(o)
+						engine.NEW.Add(o)
 					}
 				}
 			}

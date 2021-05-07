@@ -18,15 +18,11 @@ type (
 		Update(Set) int
 	}
 
-	BaseSet struct{}
-
 	MapSet struct {
-		BaseSet
 		data map[SetElement]bool
 	}
 
 	SliceSet struct {
-		BaseSet
 		data []SliceSetElement
 		size int
 	}
@@ -44,28 +40,17 @@ func (e *NotFoundError) Error() string {
 	return fmt.Sprintf("Not found")
 }
 
-/* BaseSet Functions and Methods */
-// TODO: remove abstract methods
-func (s *BaseSet) Show() {
-	panic("Abstract method")
-}
+/* Common Set functions and methods */
 
-func (s *BaseSet) Update(toAdd Set) int {
+// update adds all elements from `from` to `to`
+func update(from, to Set) int {
 	count := 0
-	for e := range toAdd.Iterate() {
-		if s.Add(e) {
+	for e := range from.Iterate() {
+		if to.Add(e) {
 			count++
 		}
 	}
 	return count
-}
-
-func (s *BaseSet) Add(e SetElement) bool {
-	panic("Abstract method")
-}
-
-func (s *BaseSet) Iterate() <-chan SetElement {
-	panic("Abstract method")
 }
 
 /* MapSet Functions and Methods */
@@ -86,17 +71,6 @@ func (s *MapSet) Show() {
 func (s *MapSet) Size() int {
 	return len(s.data)
 }
-
-// TODO: Remove duplicated method?
-/*func (s *MapSet) Update(toAdd Set) int {
-	count := 0
-	for e := range toAdd.Iterate() {
-		if s.Add(e) {
-			count++
-		}
-	}
-	return count
-}*/
 
 func (s *MapSet) Equals(other Set) bool {
 	s2 := other.(*MapSet)
@@ -147,6 +121,11 @@ func (s *MapSet) Iterate() <-chan SetElement {
 	return ch
 }
 
+// Update adds all elements in toAdd the set
+func (s *MapSet) Update(toAdd Set) int {
+	return update(toAdd, s)
+}
+
 /* SliceSet Functions and Methods */
 func NewSliceSet(preallocate int) *SliceSet {
 	return &SliceSet{
@@ -187,10 +166,6 @@ func (s *SliceSet) Contains(e SetElement) bool {
 		return false
 	}
 	return s.data[se.IndexInSlice()] != nil
-	// if s.data[se.IndexInSlice()].Equals(se) {
-	//     return true
-	// }
-	// return false
 }
 
 func (s *SliceSet) Remove(e SetElement) bool {
@@ -234,4 +209,9 @@ func (s *SliceSet) Show() {
 		fmt.Print(e, " ")
 	}
 	fmt.Print("}")
+}
+
+// Update adds all elements in toAdd the set
+func (s *SliceSet) Update(toAdd Set) int {
+	return update(toAdd, s)
 }

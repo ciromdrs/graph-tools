@@ -155,7 +155,7 @@ func (r *NonTerminalRelation) AddRule(startVertices ds.VertexSet,
 	nodeSet := NewNodeSet(engine.Factory())
 	nodeSet.new.Update(startVertices)
 	nodeSet.relation = r
-	engine.AddNew(nodeSet)
+	engine.NEW.Add(nodeSet)
 	r.rules = append(r.rules, nodeSet)
 
 	for _, label := range labels {
@@ -233,7 +233,7 @@ func (r *NestedRelation) SetRule(labels []ds.Vertex, engine *TIEngine) {
 	nodeSet := NewNodeSet(engine.Factory())
 	nodeSet.new.Add(r.node)
 	nodeSet.relation = r
-	engine.AddNew(nodeSet)
+	engine.NEW.Add(nodeSet)
 	r.rule = nodeSet
 
 	for _, label := range labels {
@@ -292,7 +292,7 @@ func (r *ExpressionRelation) SetRule(startVertices ds.VertexSet,
 	nodeSet := NewNodeSet(engine.Factory())
 	nodeSet.new.Update(startVertices)
 	nodeSet.relation = r
-	engine.AddNew(nodeSet)
+	engine.NEW.Add(nodeSet)
 	r.rule = nodeSet
 
 	for _, label := range labels {
