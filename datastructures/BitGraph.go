@@ -424,6 +424,7 @@ func (s *BitVertexSet) Remove(v Vertex) bool {
 	removed := s.Contains(b)
 	if removed {
 		s.data[b.index] = s.data[b.index] &^ b.id
+		s.size--
 	}
 	return removed
 }
