@@ -176,17 +176,20 @@ func (r *NonTerminalRelation) IsNonTerminal() bool {
 }
 
 // TraceItems returns TraceItem objects that represent the relation.
-func (r *NonTerminalRelation) TraceItems(f Factory) []*TraceItem {
+func (r *NonTerminalRelation) TraceItems(engine *TIEngine) []*TraceItem {
 	items := make([]*TraceItem, len(r.rules))
 	for i, rule := range r.rules {
-		start := f.NewVertexSet()
-		start.Add(r.Node())
 		var newrule []ds.Vertex
+		var posets []ds.VertexSet
 		newrule = append(newrule, r.Label())
+		posets = append(posets, engine.Factory().NewVertexSet())
+		posets[0].Add(r.Node())
 		for symbol := rule.next; symbol != nil; symbol = symbol.objNodeSet.next {
 			newrule = append(newrule, symbol.predicate)
+			posets = append(posets, engine.Factory().NewVertexSet())
+			// TODO: fill posets
 		}
-		items[i] = f.NewTraceItem(start, newrule)
+		items[i] = engine.Factory().NewTraceItem(newrule, posets)
 	}
 	return items
 }

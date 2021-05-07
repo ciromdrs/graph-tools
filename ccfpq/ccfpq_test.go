@@ -69,7 +69,7 @@ func TestNonTerminalRelation(t *testing.T) {
 	S := f.NewVertex("S")
 
 	r := NewNonTerminalRelation(x, S, f)
-	items := r.TraceItems(f)
+	items := r.TraceItems(engine)
 	Assert(t, items != nil && len(items) == 0,
 		fmt.Sprintf("Wrong trace items for relation with nil rules. "+
 			"Expected empty slice, got %v.", items))
@@ -79,15 +79,17 @@ func TestNonTerminalRelation(t *testing.T) {
 	var rule []ds.Vertex
 	rule = append(rule, S, a, S, b)
 	r.AddRule(start, rule[1:], engine)
-	want := f.NewTraceItem(start, rule)
+	posets := make([]ds.VertexSet, len(rule))
+	posets[0] = start
+	for i := 1; i < len(posets); i++ {
+		posets[i] = f.NewVertexSet()
+	}
+	want := f.NewTraceItem(rule, posets)
 
-	items = r.TraceItems(f)
+	items = r.TraceItems(engine)
 	Assert(t, items != nil, "Expected non-nil TraceItems().")
 	Assert(t, len(items) == 1, fmt.Sprintf("Expected length 1, got %v.",
 		len(items)))
 	Assert(t, items[0].Equals(want),
 		fmt.Sprintf("Wrong trace item. Expected %v, got %v", want, items[0]))
-
-	items[0].Show()
-	fmt.Println()
 }
