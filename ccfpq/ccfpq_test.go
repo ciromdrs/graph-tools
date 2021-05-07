@@ -60,31 +60,33 @@ func testDatabases(t *testing.T, factorytype string) {
 }
 
 func TestNonTerminalRelation(t *testing.T) {
-	f := NewFactory(ds.SIMPLE_FACTORY, 0, 0)
-	engine := NewTIEngine(nil, nil, nil, f)
+	// TODO: Test SliceFactory
+	G, D, F := QuickLoad("testdata/aSb.yrd", "testdata/graph-ti.txt", ds.SIMPLE_FACTORY)
+	one := F.NewVertex("1")
+	S := F.NewPredicate("S")
+	a := F.NewPredicate("a")
+	b := F.NewPredicate("b")
+	Q := []pair{*newPair(one, S)}
+	engine := NewTIEngine(G, D, Q, F)
+	// TODO: test trace items content
 
-	x := f.NewVertex("x")
-	a := f.NewVertex("a")
-	b := f.NewVertex("b")
-	S := f.NewVertex("S")
-
-	r := NewNonTerminalRelation(x, S, f)
+	r := NewNonTerminalRelation(one, S, F)
 	items := r.TraceItems(engine)
 	Assert(t, items != nil && len(items) == 0,
 		fmt.Sprintf("Wrong trace items for relation with nil rules. "+
 			"Expected empty slice, got %v.", items))
 
-	start := f.NewVertexSet()
-	start.Add(x)
+	start := F.NewVertexSet()
+	start.Add(one)
 	var rule []ds.Vertex
 	rule = append(rule, S, a, S, b)
 	r.AddRule(start, rule[1:], engine)
 	posets := make([]ds.VertexSet, len(rule))
 	posets[0] = start
 	for i := 1; i < len(posets); i++ {
-		posets[i] = f.NewVertexSet()
+		posets[i] = F.NewVertexSet()
 	}
-	want := f.NewTraceItem(rule, posets)
+	want := F.NewTraceItem(rule, posets)
 
 	items = r.TraceItems(engine)
 	Assert(t, items != nil, "Expected non-nil TraceItems().")
