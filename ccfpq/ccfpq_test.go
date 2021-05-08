@@ -59,15 +59,24 @@ func testDatabases(t *testing.T, factorytype string) {
 	}
 }
 
-func TestNonTerminalRelation(t *testing.T) {
-	// TODO: Test SliceFactory
-	G, D, F := QuickLoad("testdata/aSb.yrd", "testdata/graph-ti.txt", ds.SIMPLE_FACTORY)
+func TestSimpleNonTerminalRelation(t *testing.T) {
+	testNonTerminalRelation(t, ds.SIMPLE_FACTORY)
+}
+
+func TestSliceNonTerminalRelation(t *testing.T) {
+	testNonTerminalRelation(t, ds.SLICE_FACTORY)
+}
+
+func testNonTerminalRelation(t *testing.T, factoryType string) {
+	G, D, F := QuickLoad("testdata/aSb.yrd", "testdata/graph-ti.txt",
+		factoryType)
 	one := F.NewVertex("1")
 	S := F.NewPredicate("S")
 	a := F.NewPredicate("a")
 	b := F.NewPredicate("b")
 	Q := []pair{*newPair(one, S)}
 	engine := NewTIEngine(G, D, Q, F)
+
 	// TODO: test trace items content
 
 	r := NewNonTerminalRelation(one, S, F)
