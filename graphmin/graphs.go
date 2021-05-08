@@ -36,6 +36,9 @@ type (
 	}
 )
 
+/* Edge methods and functions */
+
+// newEdge creates an Edge object.
 func newEdge(s, X, o ds.Vertex) *Edge {
 	e := &Edge{
 		isNecessary:  false,
@@ -44,6 +47,11 @@ func newEdge(s, X, o ds.Vertex) *Edge {
 	}
 	e.triple = triple{s: s, X: X, o: o}
 	return e
+}
+
+// Convert triple to string
+func (t triple) String() string {
+	return fmt.Sprintf("(%v, %v, %v)", t.s.String(), t.X.String(), t.o.String())
 }
 
 func (e *Edge) addDependency(item *AugItem, pos int) {
@@ -66,17 +74,17 @@ func newHashGraph() *HashGraph {
 
 // Add adds an edge to the graph. It returns a boolean value indicating
 // whether the edge was in the graph.
-func (g *HashGraph) Add(*Edge) bool {
-	panic("Not implemented yet")
+func (g *HashGraph) Add(e *Edge) bool {
+	return g.data.Add(e)
 }
 
 // Remove removes an edge from the graph. It returns a boolean value indicating
 // whether the edge was in the graph.
-func (g *HashGraph) Remove(*Edge) bool {
-	panic("Not implemented yet")
+func (g *HashGraph) Remove(e *Edge) bool {
+	return g.data.Remove(e)
 }
 
 // Contains checks wether the graph contains the given edge
-func (g *HashGraph) Contains(*Edge) bool {
-	panic("Not implemented yet")
+func (g *HashGraph) Contains(e *Edge) bool {
+	return g.data.Contains(e)
 }

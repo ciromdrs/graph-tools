@@ -63,3 +63,20 @@ func TestAugItem(t *testing.T) {
 	AssertPanic(t, func() { item.addEdge(e2, 0) },
 		"Should not add edge with wrong predicate b.")
 }
+
+func TestHashGraph(t *testing.T) {
+	var g Graph = newHashGraph()
+	s := ds.NewSimpleVertex("s")
+	p := ds.NewSimpleVertex("p")
+	o := ds.NewSimpleVertex("o")
+	e := newEdge(s, p, o)
+
+	Assert(t, !g.Contains(e), "Should not contain edge.")
+	Assert(t, !g.Remove(e), "Should not remove edge.")
+	Assert(t, g.Add(e), "Should have added edge.")
+	Assert(t, !g.Add(e), "Should not add edge again.")
+	Assert(t, g.Contains(e), "Should contain edge.")
+	Assert(t, g.Remove(e), "Should remove edge.")
+	Assert(t, !g.Remove(e), "Should not remove edge again.")
+	Assert(t, !g.Contains(e), "Should not contain removed edge.")
+}
