@@ -19,6 +19,7 @@ type relationsSet interface {
 	set(ds.Vertex, ds.Vertex, Relation)
 	get(ds.Vertex, ds.Vertex) Relation
 	iterate() <-chan Relation
+	TraceItems(Factory) []*TraceItem
 }
 
 /* Structs */
@@ -351,6 +352,34 @@ func (m *mapRelationsSet) iterate() <-chan Relation {
 	return ch
 }
 
+// TraceItems returns the TraceItems that correspond to the mapRelationsSet
+func (m *mapRelationsSet) TraceItems(f Factory) []*TraceItem {
+	return traceItems(m, f)
+}
+
+// traceItems returns the TraceItems that correspond to the given relationsSet
+func traceItems(R relationsSet, f Factory) []*TraceItem {
+	var items []*TraceItem
+	for r := range R.iterate() {
+		// TODO: Convert NestedRelations
+		if r, ok := r.(*NonTerminalRelation); ok {
+			for _, poset := range r.rules {
+				var rule []ds.Vertex
+				var posets []ds.VertexSet
+				rule = append(rule, r.Label())
+				posets = append(posets, poset.nodes)
+				for poset.next != nil {
+					rule = append(rule, poset.next.predicate)
+					poset = poset.next.objNodeSet
+					posets = append(posets, poset.nodes)
+				}
+				items = append(items, f.NewTraceItem(rule, posets))
+			}
+		}
+	}
+	return items
+}
+
 /* sliceRelationsSet Functions and Methods */
 func newSliceRelationsSet(VSize, ESize int) *sliceRelationsSet {
 	return &sliceRelationsSet{
@@ -384,6 +413,11 @@ func (m *sliceRelationsSet) iterate() <-chan Relation {
 		defer close(ch)
 	}()
 	return ch
+}
+
+// TraceItems returns the TraceItems that correspond to the mapRelationsSet
+func (m *sliceRelationsSet) TraceItems(f Factory) []*TraceItem {
+	return traceItems(m, f)
 }
 
 /* TraceItem methods and functions */

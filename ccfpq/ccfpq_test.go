@@ -7,6 +7,7 @@ import (
 	. "github.com/ciromdrs/graph-tools/util"
 	"os"
 	"strconv"
+	"strings"
 	"testing"
 )
 
@@ -72,12 +73,8 @@ func testNonTerminalRelation(t *testing.T, factoryType string) {
 		factoryType)
 	one := F.NewVertex("1")
 	S := F.NewPredicate("S")
-	a := F.NewPredicate("a")
-	b := F.NewPredicate("b")
 	Q := []pair{*newPair(one, S)}
 	engine := NewTIEngine(G, D, Q, F)
-
-	// TODO: test trace items content
 
 	r := NewNonTerminalRelation(one, S, F)
 	items := r.TraceItems(engine)
@@ -85,22 +82,57 @@ func testNonTerminalRelation(t *testing.T, factoryType string) {
 		fmt.Sprintf("Wrong trace items for relation with nil rules. "+
 			"Expected empty slice, got %v.", items))
 
-	start := F.NewVertexSet()
-	start.Add(one)
-	var rule []ds.Vertex
-	rule = append(rule, S, a, S, b)
-	r.AddRule(start, rule[1:], engine)
-	posets := make([]ds.VertexSet, len(rule))
-	posets[0] = start
-	for i := 1; i < len(posets); i++ {
-		posets[i] = F.NewVertexSet()
+	var want []*TraceItem
+	want = append(want, traceItemFromString("S 1 a 2,3 S 2,3,4 b 4,5", F))
+	want = append(want, traceItemFromString("S 1", F))
+	want = append(want, traceItemFromString("S 2 a 3 S 3 b 4", F))
+	want = append(want, traceItemFromString("S 2", F))
+	want = append(want, traceItemFromString("S 3 a  S  b ", F))
+	want = append(want, traceItemFromString("S 3", F))
+	engine.Run()
+	items = engine.R.TraceItems(F)
+	Assert(t, items != nil, "Expected non-nil trace items.")
+	Assert(t, len(items) == len(want),
+		fmt.Sprintf("Expected %v trace items, got %v.", len(want), len(items)))
+	for _, it := range want {
+		found := false
+		for _, other := range items {
+			found = found || it.Equals(other)
+		}
+		msg := fmt.Sprintf("Wrong trace items. Item %v not found.\n",
+			it.String())
+		msg += "items = ["
+		for _, it := range items {
+			msg += it.String() + ", "
+		}
+		msg += "]\nwant = "
+		for _, it := range want {
+			msg += it.String() + ", "
+		}
+		msg += "]"
+		Assert(t, found, msg)
 	}
-	want := F.NewTraceItem(rule, posets)
+}
 
-	items = r.TraceItems(engine)
-	Assert(t, items != nil, "Expected non-nil TraceItems().")
-	Assert(t, len(items) == 1, fmt.Sprintf("Expected length 1, got %v.",
-		len(items)))
-	Assert(t, items[0].Equals(want),
-		fmt.Sprintf("Wrong trace item. Expected %v, got %v", want, items[0]))
+// traceItemFromString is a shorthand for building TraceItems.
+func traceItemFromString(str string, factory Factory) *TraceItem {
+	parts := strings.Split(str, " ")
+	var rule []ds.Vertex
+	var posets []ds.VertexSet
+	for i, p := range parts {
+		if i%2 == 0 {
+			// symbol
+			rule = append(rule, factory.NewPredicate(p))
+		} else {
+			// poset
+			poset := factory.NewVertexSet()
+			for _, e := range strings.Split(p, ",") {
+				if e != "" {
+					poset.Add(factory.NewVertex(e))
+				}
+			}
+			posets = append(posets, poset)
+		}
+	}
+	return factory.NewTraceItem(rule, posets)
 }
