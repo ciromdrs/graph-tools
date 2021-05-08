@@ -32,12 +32,11 @@ func TestAugItem(t *testing.T) {
 	o := ds.NewSimpleVertex("o")
 	e1 := newEdge(s, a, o)
 
-	item := newAugItem(S, []ds.Vertex{a, b, c})
-	if item.lhs != S {
-		t.Fatalf("Wrong lhs. Expected %v, got %v", S, item.lhs)
-	}
-	if item.rhs[0] != a || item.rhs[1] != b || item.rhs[2] != c {
-		t.Fatalf("Wrong rhs. Expected %v %v %v, got %v", a, b, c, item.rhs)
+	rule := []ds.Vertex{S, a, b, c}
+	item := newAugItem(rule)
+	if item.rule[0] != S || item.rule[1] != a || item.rule[2] != b ||
+		item.rule[3] != c {
+		t.Fatalf("Wrong rule. Expected %v, got %v", rule, item.rule)
 	}
 	if len(item.edges) < 3 {
 		t.Fatalf("Expected edges of length 3, got %v", len(item.edges))
@@ -46,13 +45,16 @@ func TestAugItem(t *testing.T) {
 	AssertPanic(t, func() { item.addEdge(e1, 0) },
 		fmt.Sprintf("Should not add inexistent edge %v.", e1))
 	e1.exists = true
-	item.addEdge(e1, 0)
-	if item.edges[0][0] != e1 {
-		t.Fatalf("Eror adding edge. Expected %v, got %v", e1, item.edges[0][0])
+	item.addEdge(e1, 1)
+	if item.edges[1][0] != e1 {
+		t.Fatalf("Eror adding edge. Expected %v, got %v", e1, item.edges[1][0])
 	}
-	if e1.dependencies[0].item != item || e1.dependencies[0].pos != 0 {
-		t.Fatalf("Eror adding dependency. Expected %v, got %v",
-			itemPos{item: item, pos: 0}, e1.dependencies[0])
+	{
+		want := itemPos{item: item, pos: 0}
+		if e1.dependencies[0].item != item || e1.dependencies[0].pos != 1 {
+			t.Fatalf("Eror adding dependency. Expected %v, got %v",
+				want, e1.dependencies[0])
+		}
 	}
 	AssertPanic(t, func() { item.addEdge(e1, 0) },
 		fmt.Sprintf("Should not add duplicated dependency %v %d.", e1, 0))

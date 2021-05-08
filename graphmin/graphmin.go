@@ -21,8 +21,7 @@ type (
 
 	// An AugItem is an augmented trace item for solving the FLGM problem
 	AugItem struct {
-		lhs   ds.Vertex
-		rhs   []ds.Vertex
+		rule  []ds.Vertex
 		edges [][]*Edge
 	}
 
@@ -67,11 +66,10 @@ func (e *Edge) addDependency(item *AugItem, pos int) {
 	e.dependencies = append(e.dependencies, itemPos{item: item, pos: pos})
 }
 
-func newAugItem(lhs ds.Vertex, rhs []ds.Vertex) *AugItem {
-	edges := make([][]*Edge, len(rhs))
+func newAugItem(rule []ds.Vertex) *AugItem {
+	edges := make([][]*Edge, len(rule))
 	return &AugItem{
-		lhs:   lhs,
-		rhs:   rhs,
+		rule:  rule,
 		edges: edges,
 	}
 }
@@ -80,9 +78,9 @@ func (item *AugItem) addEdge(e *Edge, pos int) {
 	if !e.exists {
 		panic(fmt.Sprintf("Edge %v does not exist.", e))
 	}
-	if !e.X.Equals(item.rhs[pos]) {
+	if !e.X.Equals(item.rule[pos]) {
 		panic(fmt.Sprintf("Wrong predicate. Expected %v, got %v.",
-			item.rhs[pos], e.X))
+			item.rule[pos], e.X))
 	}
 	item.edges[pos] = append(item.edges[pos], e)
 	e.addDependency(item, pos)
