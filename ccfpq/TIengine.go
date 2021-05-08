@@ -62,6 +62,11 @@ func (ns *NodeSet) Mark(f Factory) {
 	ns.new = f.NewVertexSet()
 }
 
+func (ns *NodeSet) String() string {
+	return "&{ " + ns.prev.predicate.String() + " " + ns.nodes.String() + " " +
+		ns.next.predicate.String() + "}"
+}
+
 func (engine *TIEngine) GetOrCreate(node, label ds.Vertex, G *Grammar) Relation {
 	r := engine.R.get(node, label)
 	if r == nil {

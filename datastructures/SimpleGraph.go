@@ -29,7 +29,7 @@ func NewSimpleVertex(label string) SimpleVertex {
 	return SimpleVertex{label: label}
 }
 
-func (v SimpleVertex) ToString() string {
+func (v SimpleVertex) String() string {
 	return v.Label()
 }
 
@@ -46,10 +46,6 @@ func NewSimpleVertexSet() *SimpleVertexSet {
 	return &SimpleVertexSet{
 		mapset: NewMapSet(),
 	}
-}
-
-func (s *SimpleVertexSet) Show() {
-	s.mapset.Show()
 }
 
 func (s *SimpleVertexSet) Size() int {
@@ -99,6 +95,10 @@ func (s *SimpleVertexSet) Equals(other VertexSet) bool {
 		}
 	}
 	return true
+}
+
+func (s *SimpleVertexSet) String() string {
+	return s.mapset.String()
 }
 
 /* SimpleGraph Methods and Functions */

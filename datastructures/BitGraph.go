@@ -330,7 +330,7 @@ func (a BitVertex) Equals(other Vertex) bool {
 	return (a.index == b.index) && (a.id == b.id)
 }
 
-func (a BitVertex) ToString() string {
+func (a BitVertex) String() string {
 	return fmt.Sprintf("(%d, %"+strconv.Itoa(CELL_SIZE)+"b)", a.index, a.id)
 }
 
@@ -339,7 +339,7 @@ func (a BitVertex) IndexInSlice() int {
 }
 
 func (a BitVertex) Label() string {
-	return a.ToString() // TODO: fetch label from IDMap
+	return a.String() // TODO: fetch label from IDMap
 }
 
 /* vertexBitMask Functions and Methods */
@@ -445,15 +445,6 @@ func (s *BitVertexSet) Size() int {
 	return s.size
 }
 
-func (s *BitVertexSet) Show() {
-	fmt.Print("{ ")
-	for v := range s.Iterate() {
-		b := v.(BitVertex)
-		fmt.Printf(b.ToString())
-	}
-	fmt.Print("}")
-}
-
 func (s *BitVertexSet) Update(toAdd VertexSet) int {
 	c := 0
 	for v := range toAdd.Iterate() {
@@ -462,4 +453,13 @@ func (s *BitVertexSet) Update(toAdd VertexSet) int {
 		}
 	}
 	return c
+}
+
+func (s *BitVertexSet) String() string {
+	out := "{ "
+	for e := range s.Iterate() {
+		out += e.String() + " "
+	}
+	out += "}"
+	return out
 }

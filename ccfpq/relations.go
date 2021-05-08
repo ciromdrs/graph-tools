@@ -404,10 +404,14 @@ func (ti *TraceItem) Equals(other *TraceItem) bool {
 }
 
 func (ti *TraceItem) Show() {
-	fmt.Print(ti.rule[0], " -> ")
-	ti.posets[0].Show()
+	fmt.Print(ti.String())
+}
+
+func (ti *TraceItem) String() string {
+	out := ti.rule[0].String() + " -> " + ti.posets[0].String()
 	for i := 1; i < len(ti.rule); i++ {
-		fmt.Print(ti.rule[i])
-		ti.posets[i].Show()
+		out += ti.rule[i].String()
+		out += ti.posets[i].String()
 	}
+	return out
 }

@@ -9,7 +9,7 @@ import (
 
 /* Interfaces */
 type Vertex interface {
-	ToString() string
+	String() string
 	Label() string
 	Equals(other Vertex) bool
 }
@@ -23,6 +23,7 @@ type VertexSet interface {
 	Show()
 	Size() int
 	Update(VertexSet) int
+	String() string
 }
 
 type Graph interface {
@@ -107,6 +108,10 @@ func (s *BaseVertexSet) Equals(other VertexSet) bool {
 }
 
 func (s *BaseVertexSet) Show() {
+	fmt.Print(s.String())
+}
+
+func (s *BaseVertexSet) String() string {
 	panic("Abstract method.")
 }
 
@@ -156,8 +161,8 @@ func NewSuperVertex(vertex Vertex, vertices VertexSet) SuperVertex {
 	}
 }
 
-func (v SuperVertex) ToString() string {
-	return v.Vertex.ToString()
+func (v SuperVertex) String() string {
+	return v.Vertex.String()
 }
 
 func (v SuperVertex) Label() string {

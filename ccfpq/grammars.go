@@ -61,9 +61,9 @@ func (g *Grammar) Show() {
 
 	for lhs := range g.Rules {
 		for _, rhs := range g.Rules[lhs] {
-			fmt.Print(lhs.ToString(), " ->")
+			fmt.Print(lhs.String(), " ->")
 			for _, s := range rhs {
-				fmt.Print(" ", s.ToString())
+				fmt.Print(" ", s.String())
 			}
 			fmt.Println()
 		}

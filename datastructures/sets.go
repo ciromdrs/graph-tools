@@ -5,7 +5,9 @@ import (
 )
 
 type (
-	SetElement interface{}
+	SetElement interface {
+		String() string
+	}
 
 	Set interface {
 		Add(e SetElement) bool
@@ -14,6 +16,7 @@ type (
 		Iterate() <-chan SetElement
 		Remove(e SetElement) bool
 		Show()
+		String() string
 		Size() int
 		Update(Set) int
 	}
@@ -28,6 +31,7 @@ type (
 	}
 
 	SliceSetElement interface {
+		SetElement
 		IndexInSlice() int
 	}
 
@@ -41,6 +45,15 @@ func (e *NotFoundError) Error() string {
 }
 
 /* Common Set functions and methods */
+
+func setString(s Set) string {
+	out := "{ "
+	for e := range s.Iterate() {
+		out += e.String() + " "
+	}
+	out += "}"
+	return out
+}
 
 // update adds all elements from `from` to `to`
 func update(from, to Set) int {
@@ -58,14 +71,6 @@ func NewMapSet() *MapSet {
 	return &MapSet{
 		data: make(map[SetElement]bool),
 	}
-}
-
-func (s *MapSet) Show() {
-	fmt.Print("{ ")
-	for e := range s.Iterate() {
-		fmt.Print(e, " ")
-	}
-	fmt.Print("}")
 }
 
 func (s *MapSet) Size() int {
@@ -124,6 +129,14 @@ func (s *MapSet) Iterate() <-chan SetElement {
 // Update adds all elements in toAdd the set
 func (s *MapSet) Update(toAdd Set) int {
 	return update(toAdd, s)
+}
+
+func (s *MapSet) String() string {
+	return setString(s)
+}
+
+func (s *MapSet) Show() {
+	fmt.Println(s.String())
 }
 
 /* SliceSet Functions and Methods */
@@ -203,15 +216,15 @@ func (s *SliceSet) Equals(other Set) bool {
 	return true
 }
 
-func (s *SliceSet) Show() {
-	fmt.Print("{ ")
-	for e := range s.Iterate() {
-		fmt.Print(e, " ")
-	}
-	fmt.Print("}")
-}
-
 // Update adds all elements in toAdd the set
 func (s *SliceSet) Update(toAdd Set) int {
 	return update(toAdd, s)
+}
+
+func (s *SliceSet) String() string {
+	return setString(s)
+}
+
+func (s *SliceSet) Show() {
+	fmt.Println(s.String())
 }
