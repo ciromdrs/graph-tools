@@ -11,6 +11,7 @@ type (
 		Add(*Edge) bool
 		Remove(*Edge) bool
 		Contains(*Edge) bool
+		Iterate() <-chan *Edge
 	}
 
 	// HashGraph is a map-based Graph implementation.
@@ -87,4 +88,16 @@ func (g *HashGraph) Remove(e *Edge) bool {
 // Contains checks wether the graph contains the given edge
 func (g *HashGraph) Contains(e *Edge) bool {
 	return g.data.Contains(e)
+}
+
+// Iterate iterates over the edges.
+func (g *HashGraph) Iterate() <-chan *Edge {
+	ch := make(chan *Edge)
+	go func() {
+		for se := range g.data.Iterate() {
+			ch <- se.(*Edge)
+		}
+		defer close(ch)
+	}()
+	return ch
 }

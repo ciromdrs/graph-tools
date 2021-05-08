@@ -69,14 +69,21 @@ func TestHashGraph(t *testing.T) {
 	s := ds.NewSimpleVertex("s")
 	p := ds.NewSimpleVertex("p")
 	o := ds.NewSimpleVertex("o")
-	e := newEdge(s, p, o)
+	e1 := newEdge(s, p, o)
 
-	Assert(t, !g.Contains(e), "Should not contain edge.")
-	Assert(t, !g.Remove(e), "Should not remove edge.")
-	Assert(t, g.Add(e), "Should have added edge.")
-	Assert(t, !g.Add(e), "Should not add edge again.")
-	Assert(t, g.Contains(e), "Should contain edge.")
-	Assert(t, g.Remove(e), "Should remove edge.")
-	Assert(t, !g.Remove(e), "Should not remove edge again.")
-	Assert(t, !g.Contains(e), "Should not contain removed edge.")
+	Assert(t, !g.Contains(e1), "Should not contain edge.")
+	Assert(t, !g.Remove(e1), "Should not remove edge.")
+	Assert(t, g.Add(e1), "Should have added edge.")
+	Assert(t, !g.Add(e1), "Should not add edge again.")
+	Assert(t, g.Contains(e1), "Should contain edge.")
+	Assert(t, g.Remove(e1), "Should remove edge.")
+	Assert(t, !g.Remove(e1), "Should not remove edge again.")
+	Assert(t, !g.Contains(e1), "Should not contain removed edge.")
+
+	e2 := newEdge(s, p, ds.NewSimpleVertex("o2"))
+	g.Add(e2)
+	//TODO: assert size
+	for e := range g.Iterate() {
+		Assert(t, e == e1 || e == e2, "Wrong edges in iteration.")
+	}
 }
