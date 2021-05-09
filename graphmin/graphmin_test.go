@@ -102,24 +102,45 @@ func TestHashGraph(t *testing.T) {
 	for e := range g.Iterate() {
 		Assert(t, e == e1 || e == e2, "Wrong edges in iteration.")
 	}
+}
 
-	_, simpleGraph, _ := ccfpq.QuickLoad("../ccfpq/testdata/sc.yrd",
-		"../ccfpq/testdata/foaf.txt", ds.SIMPLE_FACTORY)
-	hashGraph := SimpleToHashGraph(simpleGraph.(*ds.SimpleGraph))
-	Assert(t, hashGraph.Size() == simpleGraph.Size(),
-		fmt.Sprintf("Wrong hashGraph.Size(). Expected %v, got %v.",
-			simpleGraph.Size(),
-			hashGraph.Size()))
-	simpleGraph.Show()
-	for t1 := range simpleGraph.Iterate() {
-		found := false
-		for e := range hashGraph.Iterate() {
-			t2 := e.triple
-			if t1[0] == t2.s && t1[1] == t2.X && t1[2] == t2.o {
-				found = true
-				break
+func TestSimpleGraphToHashGraphConversion(t *testing.T) {
+	var databases []string
+	databases = append(databases, "../ccfpq/testdata/atom-primitive.txt")
+	if !testing.Short() {
+		databases = append(databases,
+			"../ccfpq/testdata/biomedical-mesure-primitive.txt",
+			"../ccfpq/testdata/foaf.txt",
+			"../ccfpq/testdata/funding.txt",
+			"../ccfpq/testdata/generations.txt",
+			"../ccfpq/testdata/people_pets.txt",
+			"../ccfpq/testdata/pizza.txt",
+			"../ccfpq/testdata/skos.txt",
+			"../ccfpq/testdata/travel.txt",
+			"../ccfpq/testdata/univ-bench.txt",
+			"../ccfpq/testdata/wine.txt",
+		)
+	}
+
+	for _, graph := range databases {
+		_, simpleGraph, _ := ccfpq.QuickLoad("../ccfpq/testdata/sc.yrd",
+			graph, ds.SIMPLE_FACTORY)
+		hashGraph := SimpleToHashGraph(simpleGraph.(*ds.SimpleGraph))
+		Assert(t, hashGraph.Size() == simpleGraph.Size(),
+			fmt.Sprintf("Wrong hashGraph.Size(). Expected %v, got %v.",
+				simpleGraph.Size(),
+				hashGraph.Size()))
+		simpleGraph.Show()
+		for t1 := range simpleGraph.Iterate() {
+			found := false
+			for e := range hashGraph.Iterate() {
+				t2 := e.triple
+				if t1[0] == t2.s && t1[1] == t2.X && t1[2] == t2.o {
+					found = true
+					break
+				}
 			}
+			Assert(t, found, fmt.Sprintf("Missing triple %v in hashGraph.", t1))
 		}
-		Assert(t, found, fmt.Sprintf("Missing triple %v in hashGraph.", t1))
 	}
 }
