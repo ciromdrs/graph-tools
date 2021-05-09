@@ -2,6 +2,7 @@ package graphmin
 
 import (
 	"fmt"
+	"github.com/ciromdrs/graph-tools/ccfpq"
 	ds "github.com/ciromdrs/graph-tools/datastructures"
 	. "github.com/ciromdrs/graph-tools/util"
 	"testing"
@@ -100,5 +101,25 @@ func TestHashGraph(t *testing.T) {
 		fmt.Sprintf("Wrong g.Size(). Expected 2, got %v.", g.Size()))
 	for e := range g.Iterate() {
 		Assert(t, e == e1 || e == e2, "Wrong edges in iteration.")
+	}
+
+	_, simpleGraph, _ := ccfpq.QuickLoad("../ccfpq/testdata/sc.yrd",
+		"../ccfpq/testdata/foaf.txt", ds.SIMPLE_FACTORY)
+	hashGraph := SimpleToHashGraph(simpleGraph.(*ds.SimpleGraph))
+	Assert(t, hashGraph.Size() == simpleGraph.Size(),
+		fmt.Sprintf("Wrong hashGraph.Size(). Expected %v, got %v.",
+			simpleGraph.Size(),
+			hashGraph.Size()))
+	simpleGraph.Show()
+	for t1 := range simpleGraph.Iterate() {
+		found := false
+		for e := range hashGraph.Iterate() {
+			t2 := e.triple
+			if t1[0] == t2.s && t1[1] == t2.X && t1[2] == t2.o {
+				found = true
+				break
+			}
+		}
+		Assert(t, found, fmt.Sprintf("Missing triple %v in hashGraph.", t1))
 	}
 }

@@ -107,3 +107,12 @@ func (g *HashGraph) Iterate() <-chan *Edge {
 func (g *HashGraph) Size() int {
 	return g.data.Size()
 }
+
+// SimpleToHashGraph creates a HashGraph from a ds.SimpleGraph
+func SimpleToHashGraph(simple *ds.SimpleGraph) *HashGraph {
+	hash := newHashGraph()
+	for t := range simple.Iterate() {
+		hash.Add(newEdge(t[0], t[1], t[2]))
+	}
+	return hash
+}
