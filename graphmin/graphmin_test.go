@@ -66,6 +66,9 @@ func TestAugItem(t *testing.T) {
 
 func TestHashGraph(t *testing.T) {
 	var g Graph = newHashGraph()
+	Assert(t, g.Size() == 0,
+		fmt.Sprintf("Wrong g.Size(). Expected 0, got %v.", g.Size()))
+
 	s := ds.NewSimpleVertex("s")
 	p := ds.NewSimpleVertex("p")
 	o := ds.NewSimpleVertex("o")
@@ -73,16 +76,28 @@ func TestHashGraph(t *testing.T) {
 
 	Assert(t, !g.Contains(e1), "Should not contain edge.")
 	Assert(t, !g.Remove(e1), "Should not remove edge.")
+	Assert(t, g.Size() == 0,
+		fmt.Sprintf("Wrong g.Size(). Expected 0, got %v.", g.Size()))
+
 	Assert(t, g.Add(e1), "Should have added edge.")
+	Assert(t, g.Size() == 1,
+		fmt.Sprintf("Wrong g.Size(). Expected 1, got %v.", g.Size()))
 	Assert(t, !g.Add(e1), "Should not add edge again.")
+	Assert(t, g.Size() == 1,
+		fmt.Sprintf("Wrong g.Size(). Expected 1, got %v.", g.Size()))
 	Assert(t, g.Contains(e1), "Should contain edge.")
+
 	Assert(t, g.Remove(e1), "Should remove edge.")
 	Assert(t, !g.Remove(e1), "Should not remove edge again.")
 	Assert(t, !g.Contains(e1), "Should not contain removed edge.")
+	Assert(t, g.Size() == 0,
+		fmt.Sprintf("Wrong g.Size(). Expected 0, got %v.", g.Size()))
 
 	e2 := newEdge(s, p, ds.NewSimpleVertex("o2"))
+	g.Add(e1)
 	g.Add(e2)
-	//TODO: assert size
+	Assert(t, g.Size() == 2,
+		fmt.Sprintf("Wrong g.Size(). Expected 2, got %v.", g.Size()))
 	for e := range g.Iterate() {
 		Assert(t, e == e1 || e == e2, "Wrong edges in iteration.")
 	}

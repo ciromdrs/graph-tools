@@ -12,6 +12,7 @@ type (
 		Remove(*Edge) bool
 		Contains(*Edge) bool
 		Iterate() <-chan *Edge
+		Size() int
 	}
 
 	// HashGraph is a map-based Graph implementation.
@@ -100,4 +101,9 @@ func (g *HashGraph) Iterate() <-chan *Edge {
 		defer close(ch)
 	}()
 	return ch
+}
+
+// Size returns the number of edges.
+func (g *HashGraph) Size() int {
+	return g.data.Size()
 }
