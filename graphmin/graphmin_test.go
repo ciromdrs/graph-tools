@@ -104,7 +104,7 @@ func TestHashGraph(t *testing.T) {
 	}
 }
 
-func TestSimpleGraphToHashGraphConversion(t *testing.T) {
+func TestSimpleToHashGraphConversion(t *testing.T) {
 	var databases []string
 	databases = append(databases, "../ccfpq/testdata/atom-primitive.txt")
 	if !testing.Short() {
@@ -130,7 +130,6 @@ func TestSimpleGraphToHashGraphConversion(t *testing.T) {
 			fmt.Sprintf("Wrong hashGraph.Size(). Expected %v, got %v.",
 				simpleGraph.Size(),
 				hashGraph.Size()))
-		simpleGraph.Show()
 		for t1 := range simpleGraph.Iterate() {
 			found := false
 			for e := range hashGraph.Iterate() {
