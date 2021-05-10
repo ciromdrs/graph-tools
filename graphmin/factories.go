@@ -22,3 +22,7 @@ func NewHashFactory() *HashFactory {
 	return &HashFactory{}
 }
 
+// NewAugItemSet creates an AugItemSet object.
+func (f *HashFactory) NewAugItemSet(prealloc int) *AugItemSet {
+	return newAugItemSet(f, prealloc)
+}

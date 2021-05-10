@@ -48,3 +48,8 @@ func TestAugItem(t *testing.T) {
 	AssertPanic(t, func() { item.addEdge(e2, 0) },
 		"Should not add edge with wrong predicate b.")
 }
+
+func TestAugItemSet(t *testing.T) {
+	f := NewHashFactory()
+	f.NewAugItemSet(0)
+}

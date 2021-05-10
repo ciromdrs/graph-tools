@@ -6,10 +6,15 @@ import (
 )
 
 type (
-	// An AugItem is an augmented trace item for solving the FLGM problem
+	// An AugItem is an augmented trace item for solving the FLGM problem.
 	AugItem struct {
 		rule  []ds.Vertex
 		edges [][]*Edge
+	}
+
+	// AugItemSet is a set of AugItems.
+	AugItemSet struct {
+		data ds.Map
 	}
 )
 
@@ -31,4 +36,10 @@ func (item *AugItem) addEdge(e *Edge, pos int) {
 	}
 	item.edges[pos] = append(item.edges[pos], e)
 	e.addDependency(item, pos)
+}
+
+func newAugItemSet(f Factory, prealloc int) *AugItemSet {
+	return &AugItemSet{
+		data: f.NewMap(prealloc),
+	}
 }
