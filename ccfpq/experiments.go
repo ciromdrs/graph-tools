@@ -28,16 +28,16 @@ var (
 	counterr  uint
 )
 
-func QueryAll(G *Grammar, D ds.Graph) []pair {
-	Q := []pair{}
+func QueryAll(G *Grammar, D ds.Graph) []Query {
+	Q := []Query{}
 	for n := range D.AllNodes().Iterate() {
-		Q = append(Q, *newPair(n, G.StartSymbol))
+		Q = append(Q, newQuery(n, G.StartSymbol))
 	}
 	return Q
 }
 
-func QueryGroups(numberOfGroups int, G *Grammar, D ds.Graph, f Factory) []pair {
-	Q := make([]pair, numberOfGroups)
+func QueryGroups(numberOfGroups int, G *Grammar, D ds.Graph, f Factory) []Query {
+	Q := make([]Query, numberOfGroups)
 	for i := range Q {
 		Q[i].node = f.NewSuperVertex(f.NewVertexSet())
 		Q[i].symbol = G.StartSymbol

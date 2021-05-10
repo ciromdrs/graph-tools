@@ -73,7 +73,7 @@ func testNonTerminalRelation(t *testing.T, factoryType string) {
 		factoryType)
 	one := F.NewVertex("1")
 	S := F.NewPredicate("S")
-	Q := []pair{*newPair(one, S)}
+	Q := []Query{F.NewQuery(one, S)}
 	engine := NewTIEngine(G, D, Q, F)
 
 	r := NewNonTerminalRelation(one, S, F)

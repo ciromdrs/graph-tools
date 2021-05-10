@@ -17,7 +17,7 @@ type (
 		Run() (time.Duration, uint64)
 		Graph() ds.Graph
 		Grammar() *Grammar
-		Query() []pair
+		Query() []Query
 		Factory() Factory
 		CountResults() int
 	}
@@ -26,7 +26,7 @@ type (
 	TIEngine struct {
 		graph   ds.Graph
 		grammar *Grammar
-		query   []pair
+		query   []Query
 		f       Factory
 		R       relationsSet
 		NEW     ds.Set
@@ -41,7 +41,7 @@ type (
 		relation Relation
 	}
 
-	pair struct {
+	Query struct {
 		node   ds.Vertex
 		symbol ds.Vertex
 	}
@@ -107,9 +107,9 @@ func (engine *TIEngine) GetOrCreate(node, label ds.Vertex, G *Grammar) Relation 
 	return r
 }
 
-/* pair Methods and Functions */
-func newPair(node, symbol ds.Vertex) *pair {
-	return &pair{
+/* Query Methods and Functions */
+func newQuery(node, symbol ds.Vertex) Query {
+	return Query{
 		node:   node,
 		symbol: symbol,
 	}
@@ -118,7 +118,7 @@ func newPair(node, symbol ds.Vertex) *pair {
 /* Graph Parsing Functions */
 
 // NewTIEngine creates a new TIEngine
-func NewTIEngine(grammar *Grammar, graph ds.Graph, query []pair,
+func NewTIEngine(grammar *Grammar, graph ds.Graph, query []Query,
 	factory Factory) *TIEngine {
 	engine := &TIEngine{
 		graph:   graph,
@@ -338,7 +338,7 @@ func (engine *TIEngine) Grammar() *Grammar {
 	return engine.grammar
 }
 
-func (engine *TIEngine) Query() []pair {
+func (engine *TIEngine) Query() []Query {
 	return engine.query
 }
 

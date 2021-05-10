@@ -10,16 +10,35 @@ type (
 		NewObserversSet() observersSet
 		NewRelationsSet() relationsSet
 		NewTraceItem([]ds.Vertex, []ds.VertexSet) *TraceItem
+		NewQuery(node, label ds.Vertex) Query
 	}
 
+	baseFactory struct{}
+
 	SimpleFactory struct {
+		baseFactory
 		ds.SimpleFactory
 	}
 
 	SliceFactory struct {
+		baseFactory
 		ds.SliceFactory
 	}
 )
+
+// NewQuery creates a Query object.
+func (f *baseFactory) NewQuery(node, label ds.Vertex) Query {
+	return newQuery(node, label)
+}
+
+// newTraceItem creates a TraceItem object.
+func (f *baseFactory) NewTraceItem(rule []ds.Vertex, posets []ds.VertexSet) *TraceItem {
+	ti := &TraceItem{
+		rule:   rule,
+		posets: posets,
+	}
+	return ti
+}
 
 /* SimpleFactory Functions and Methods */
 func NewSimpleFactory() *SimpleFactory {
@@ -32,12 +51,6 @@ func (f *SimpleFactory) NewObserversSet() observersSet {
 
 func (f *SimpleFactory) NewRelationsSet() relationsSet {
 	return newMapRelationsSet(f.VSize, f.ESize)
-}
-
-// NewTraceItem returns a new TraceItem object
-func (f *SimpleFactory) NewTraceItem(rule []ds.Vertex,
-	posets []ds.VertexSet) *TraceItem {
-	return newTraceItem(rule, posets)
 }
 
 /* SliceFactory Functions and Methods */
@@ -56,20 +69,4 @@ func (f *SliceFactory) NewObserversSet() observersSet {
 
 func (f *SliceFactory) NewRelationsSet() relationsSet {
 	return newSliceRelationsSet(f.VSize, f.ESize)
-}
-
-// NewTraceItem returns a new TraceItem object
-func (f *SliceFactory) NewTraceItem(rule []ds.Vertex,
-	posets []ds.VertexSet) *TraceItem {
-	return newTraceItem(rule, posets)
-}
-
-// newTraceItem creates a TraceItem object. It is a behavior common to Simple
-// and Slice factories
-func newTraceItem(rule []ds.Vertex, posets []ds.VertexSet) *TraceItem {
-	ti := &TraceItem{
-		rule:   rule,
-		posets: posets,
-	}
-	return ti
 }
