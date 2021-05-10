@@ -10,6 +10,7 @@ const (
 	SLICE_FACTORY  = "slice_factory"
 )
 
+// TODO: Remove package variables
 var f Factory
 
 type (
