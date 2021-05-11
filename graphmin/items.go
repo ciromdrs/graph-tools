@@ -26,7 +26,7 @@ func newAugItem(rule []ds.Vertex) *AugItem {
 	}
 }
 
-func (item *AugItem) addEdge(e *Edge, pos int) {
+func (item *AugItem) AddEdge(e *Edge, pos int) {
 	if !e.exists {
 		panic(fmt.Sprintf("Edge %v does not exist.", e))
 	}

@@ -27,10 +27,10 @@ func TestAugItem(t *testing.T) {
 		t.Fatalf("Expected edges of length 3, got %v", len(item.Posets))
 	}
 
-	AssertPanic(t, func() { item.addEdge(e1, 0) },
+	AssertPanic(t, func() { item.AddEdge(e1, 0) },
 		fmt.Sprintf("Should not add inexistent edge %v.", e1))
 	e1.exists = true
-	item.addEdge(e1, 1)
+	item.AddEdge(e1, 1)
 	if item.Posets[1][0] != e1 {
 		t.Fatalf("Eror adding edge. Expected %v, got %v", e1, item.Posets[1][0])
 	}
@@ -41,11 +41,11 @@ func TestAugItem(t *testing.T) {
 				want, e1.dependencies[0])
 		}
 	}
-	AssertPanic(t, func() { item.addEdge(e1, 0) },
+	AssertPanic(t, func() { item.AddEdge(e1, 0) },
 		fmt.Sprintf("Should not add duplicated dependency %v %d.", e1, 0))
 	e2 := newEdge(s, b, o)
 	e2.exists = true
-	AssertPanic(t, func() { item.addEdge(e2, 0) },
+	AssertPanic(t, func() { item.AddEdge(e2, 0) },
 		"Should not add edge with wrong predicate b.")
 }
 
