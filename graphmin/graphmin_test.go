@@ -34,22 +34,17 @@ func TestHashGraph(t *testing.T) {
 	o := ds.NewSimpleVertex("o")
 	e1 := newEdge(s, p, o)
 
-	Assert(t, !g.Contains(e1), "Should not contain edge.")
-	Assert(t, !g.Remove(e1), "Should not remove edge.")
+	Assert(t, !g.Contains(s, p, o), "Should not contain edge.")
 	Assert(t, g.Size() == 0,
 		fmt.Sprintf("Wrong g.Size(). Expected 0, got %v.", g.Size()))
 
-	Assert(t, g.Add(e1), "Should have added edge.")
+	g.Add(e1)
 	Assert(t, g.Size() == 1,
 		fmt.Sprintf("Wrong g.Size(). Expected 1, got %v.", g.Size()))
-	Assert(t, !g.Add(e1), "Should not add edge again.")
-	Assert(t, g.Size() == 1,
-		fmt.Sprintf("Wrong g.Size(). Expected 1, got %v.", g.Size()))
-	Assert(t, g.Contains(e1), "Should contain edge.")
+	Assert(t, g.Contains(s, p, o), "Should contain edge.")
 
-	Assert(t, g.Remove(e1), "Should remove edge.")
-	Assert(t, !g.Remove(e1), "Should not remove edge again.")
-	Assert(t, !g.Contains(e1), "Should not contain removed edge.")
+	g.Remove(s, p, o)
+	Assert(t, !g.Contains(s, p, o), "Should not contain removed edge.")
 	Assert(t, g.Size() == 0,
 		fmt.Sprintf("Wrong g.Size(). Expected 0, got %v.", g.Size()))
 

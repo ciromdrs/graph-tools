@@ -8,16 +8,17 @@ import (
 type (
 	// A Graph is a set of Edges
 	Graph interface {
-		Add(*Edge) bool
-		Remove(*Edge) bool
-		Contains(*Edge) bool
+		Add(*Edge)
+		Get(ds.Vertex, ds.Vertex, ds.Vertex) *Edge
+		Remove(ds.Vertex, ds.Vertex, ds.Vertex)
+		Contains(ds.Vertex, ds.Vertex, ds.Vertex) bool
 		Iterate() <-chan *Edge
 		Size() int
 	}
 
 	// HashGraph is a map-based Graph implementation.
 	HashGraph struct {
-		data *ds.MapSet
+		data *ds.SimpleMap
 	}
 
 	// An Edge keeps track of AugItems where it appears
@@ -70,33 +71,33 @@ func (e *Edge) addDependency(item *AugItem, pos int) {
 // newHashGraph creates a HashGraph object
 func newHashGraph() *HashGraph {
 	return &HashGraph{
-		data: ds.NewMapSet(),
+		data: ds.NewSimpleMap(),
 	}
 }
 
-// Add adds an edge to the graph. It returns a boolean value indicating
-// whether the edge was in the graph.
-func (g *HashGraph) Add(e *Edge) bool {
-	return g.data.Add(e)
+// Add uniquely adds an edge to the graph.
+func (g *HashGraph) Add(e *Edge) {
+	g.data.Set(e.triple.String(), e)
 }
 
-// Remove removes an edge from the graph. It returns a boolean value indicating
-// whether the edge was in the graph.
-func (g *HashGraph) Remove(e *Edge) bool {
-	return g.data.Remove(e)
+// Remove removes an edge from the graph.
+func (g *HashGraph) Remove(s, X, o ds.Vertex) {
+	t := triple{s: s, X: X, o: o}
+	g.data.Remove(t.String())
 }
 
 // Contains checks wether the graph contains the given edge
-func (g *HashGraph) Contains(e *Edge) bool {
-	return g.data.Contains(e)
+func (g *HashGraph) Contains(s, X, o ds.Vertex) bool {
+	t := triple{s: s, X: X, o: o}
+	return g.data.Get(t.String()) != nil
 }
 
 // Iterate iterates over the edges.
 func (g *HashGraph) Iterate() <-chan *Edge {
 	ch := make(chan *Edge)
 	go func() {
-		for se := range g.data.Iterate() {
-			ch <- se.(*Edge)
+		for kv := range g.data.Iterate() {
+			ch <- kv.Value.(*Edge)
 		}
 		defer close(ch)
 	}()
@@ -106,6 +107,12 @@ func (g *HashGraph) Iterate() <-chan *Edge {
 // Size returns the number of edges.
 func (g *HashGraph) Size() int {
 	return g.data.Size()
+}
+
+// Get returns the Edge object corresponding to (s,X,o).
+func (g *HashGraph) Get(s, X, o ds.Vertex) *Edge {
+	t := triple{s: s, X: X, o: o}
+	return g.data.Get(t.String()).(*Edge)
 }
 
 // SimpleToHashGraph creates a HashGraph from a ds.SimpleGraph
