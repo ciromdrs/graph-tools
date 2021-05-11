@@ -6,6 +6,7 @@ import (
 
 type (
 	// Factory interface.
+	// TODO: Add preallocation size.
 	Factory interface {
 		ds.Factory
 		NewAugItemSet(int) *AugItemSet
