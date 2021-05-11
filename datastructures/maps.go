@@ -12,6 +12,7 @@ type (
 		Get(MapKey) MapValue
 		Remove(MapKey)
 		Iterate() <-chan KeyValue
+		Size() int
 		Show()
 	}
 
@@ -67,6 +68,11 @@ func (m *SimpleMap) Show() {
 		fmt.Print(kv.Key, "-->", kv.Value, ", ")
 	}
 	fmt.Println("}")
+}
+
+// Size returns the size of the map.
+func (m *SimpleMap) Size() int {
+	return len(m.data)
 }
 
 /* SliceMap Functions and Methods */
@@ -130,4 +136,9 @@ func (m *SliceMap) Show() {
 		fmt.Print(kv.Key, "-->", kv.Value)
 	}
 	fmt.Println("}")
+}
+
+// Size returns the size of the map.
+func (m *SliceMap) Size() int {
+	panic("Not implemented yet.")
 }
