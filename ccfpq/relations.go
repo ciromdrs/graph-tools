@@ -27,8 +27,8 @@ type relationsSet interface {
 // A TraceItem is a rule and a list of position sets. They will replace
 // Relations in future versions.
 type TraceItem struct {
-	rule   []ds.Vertex
-	posets []ds.VertexSet
+	Rule   []ds.Vertex
+	Posets []ds.VertexSet
 }
 
 type mapRelationsSet struct {
@@ -425,12 +425,12 @@ func (m *sliceRelationsSet) TraceItems(f Factory) []*TraceItem {
 // Equals returns true if the trace items are equal. It checks the rule and the
 // elements in the position sets.
 func (ti *TraceItem) Equals(other *TraceItem) bool {
-	if len(ti.rule) != len(other.rule) {
+	if len(ti.Rule) != len(other.Rule) {
 		return false
 	}
-	for i := range ti.rule {
-		if !ti.rule[i].Equals(other.rule[i]) ||
-			!ti.posets[i].Equals(other.posets[i]) {
+	for i := range ti.Rule {
+		if !ti.Rule[i].Equals(other.Rule[i]) ||
+			!ti.Posets[i].Equals(other.Posets[i]) {
 			return false
 		}
 	}
@@ -442,10 +442,10 @@ func (ti *TraceItem) Show() {
 }
 
 func (ti *TraceItem) String() string {
-	out := ti.rule[0].String() + " -> " + ti.posets[0].String()
-	for i := 1; i < len(ti.rule); i++ {
-		out += ti.rule[i].String()
-		out += ti.posets[i].String()
+	out := ti.Rule[0].String() + " -> " + ti.Posets[0].String()
+	for i := 1; i < len(ti.Rule); i++ {
+		out += ti.Rule[i].String()
+		out += ti.Posets[i].String()
 	}
 	return out
 }

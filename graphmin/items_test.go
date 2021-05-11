@@ -19,20 +19,20 @@ func TestAugItem(t *testing.T) {
 
 	rule := []ds.Vertex{S, a, b, c}
 	item := newAugItem(rule)
-	if item.rule[0] != S || item.rule[1] != a || item.rule[2] != b ||
-		item.rule[3] != c {
-		t.Fatalf("Wrong rule. Expected %v, got %v", rule, item.rule)
+	if item.Rule[0] != S || item.Rule[1] != a || item.Rule[2] != b ||
+		item.Rule[3] != c {
+		t.Fatalf("Wrong rule. Expected %v, got %v", rule, item.Rule)
 	}
-	if len(item.edges) < 3 {
-		t.Fatalf("Expected edges of length 3, got %v", len(item.edges))
+	if len(item.Posets) < 3 {
+		t.Fatalf("Expected edges of length 3, got %v", len(item.Posets))
 	}
 
 	AssertPanic(t, func() { item.addEdge(e1, 0) },
 		fmt.Sprintf("Should not add inexistent edge %v.", e1))
 	e1.exists = true
 	item.addEdge(e1, 1)
-	if item.edges[1][0] != e1 {
-		t.Fatalf("Eror adding edge. Expected %v, got %v", e1, item.edges[1][0])
+	if item.Posets[1][0] != e1 {
+		t.Fatalf("Eror adding edge. Expected %v, got %v", e1, item.Posets[1][0])
 	}
 	{
 		want := itemPos{item: item, pos: 0}

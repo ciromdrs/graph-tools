@@ -34,8 +34,8 @@ func (f *baseFactory) NewQuery(node, label ds.Vertex) Query {
 // newTraceItem creates a TraceItem object.
 func (f *baseFactory) NewTraceItem(rule []ds.Vertex, posets []ds.VertexSet) *TraceItem {
 	ti := &TraceItem{
-		rule:   rule,
-		posets: posets,
+		Rule:   rule,
+		Posets: posets,
 	}
 	return ti
 }
