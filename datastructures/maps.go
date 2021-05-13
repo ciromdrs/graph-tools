@@ -14,6 +14,7 @@ type (
 		Iterate() <-chan KeyValue
 		Size() int
 		Show()
+		String() string
 	}
 
 	KeyValue struct {
@@ -63,11 +64,22 @@ func (m *SimpleMap) Iterate() <-chan KeyValue {
 }
 
 func (m *SimpleMap) Show() {
-	fmt.Print("{")
+	fmt.Println(m.String())
+}
+
+func (m *SimpleMap) String() string {
+	s := "{ "
+	first := true
 	for kv := range m.Iterate() {
-		fmt.Print(kv.Key, "-->", kv.Value, ", ")
+		if first {
+			first = false
+		} else {
+			s += ", "
+		}
+		s += fmt.Sprintf("%v:%v", kv.Key, kv.Value)
 	}
-	fmt.Println("}")
+	s += " }"
+	return s
 }
 
 // Size returns the size of the map.
@@ -131,11 +143,17 @@ func (m *SliceMap) Iterate() <-chan KeyValue {
 }
 
 func (m *SliceMap) Show() {
+	// TODO: use String() method
 	fmt.Print("{")
 	for kv := range m.Iterate() {
 		fmt.Print(kv.Key, "-->", kv.Value)
 	}
 	fmt.Println("}")
+}
+
+func (m *SliceMap) String() string {
+	// TODO: create method common all Maps.
+	panic("Not implemented yet.")
 }
 
 // Size returns the size of the map.

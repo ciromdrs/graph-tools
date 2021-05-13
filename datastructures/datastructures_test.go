@@ -80,6 +80,14 @@ func testMap(t *testing.T, f Factory) {
 			t.Fatalf("A != B")
 		}
 	}
+
+	if f.Type() == SIMPLE_FACTORY {
+		want := "{ 0:0, 1:1, 2:2 }"
+		Assert(t, A.String() == want,
+			fmt.Sprintf("Wrong String(). Want %v, got %v.", want, A.String()))
+	} else {
+		AssertPanic(t, func() { _ = A.String() }, "Not implemented yet.")
+	}
 }
 
 func testSet(t *testing.T, f Factory) {
