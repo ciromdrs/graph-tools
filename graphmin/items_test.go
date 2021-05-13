@@ -57,6 +57,13 @@ func TestAugItem(t *testing.T) {
 	item2.AddEdge(e1, 1)
 	Assert(t, item.Equals(item2),
 		fmt.Sprintf("Wrong item. Want %v, got %v.", item2, item))
+	item2 = newAugItem([]ds.Vertex{S}, f.NewEmptyPosets(1))
+	Assert(t, !item.Equals(item2), "Items of length should be different.")
+	item2 = newAugItem([]ds.Vertex{S, c, b, a}, f.NewEmptyPosets(4))
+	Assert(t, !item.Equals(item2), "Items' rule should be different.")
+	item2 = newAugItem(rule, f.NewEmptyPosets(len(rule)))
+	item2.AddEdge(e2, 2)
+	Assert(t, !item.Equals(item2), "Items should be different.")
 }
 
 func TestAugItemSet(t *testing.T) {

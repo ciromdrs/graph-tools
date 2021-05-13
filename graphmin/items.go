@@ -41,6 +41,7 @@ func (aug *AugItem) AddEdge(e *Edge, pos int) {
 	e.addDependency(aug, pos)
 }
 
+// Equals checks whether two items are equal by comparing values, not pointers.
 func (aug *AugItem) Equals(other *AugItem) bool {
 	if len(aug.Rule) != len(other.Rule) {
 		return false
