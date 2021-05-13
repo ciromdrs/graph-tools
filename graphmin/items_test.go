@@ -18,6 +18,8 @@ func TestAugItem(t *testing.T) {
 	e1 := newEdge(s, a, o)
 
 	rule := []ds.Vertex{S, a, b, c}
+	AssertPanic(t, func() { newAugItem(rule, f.NewEmptyPosets(len(rule)-1)) },
+		"Should not allow different legth.")
 	posets := f.NewEmptyPosets(len(rule))
 	item := newAugItem(rule, posets)
 	if item.Rule[0] != S || item.Rule[1] != a || item.Rule[2] != b ||
