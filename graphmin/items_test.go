@@ -50,6 +50,11 @@ func TestAugItem(t *testing.T) {
 	e2.exists = true
 	AssertPanic(t, func() { item.AddEdge(e2, 0) },
 		"Should not add edge with wrong predicate b.")
+	posets = f.NewEmptyPosets(len(rule))
+	item2 := newAugItem(rule, posets)
+	item2.AddEdge(e1, 1)
+	Assert(t, item.Equals(item2),
+		fmt.Sprintf("Wrong item. Want %v, got %v.", item2, item))
 }
 
 func TestAugItemSet(t *testing.T) {

@@ -40,9 +40,22 @@ func (aug *AugItem) AddEdge(e *Edge, pos int) {
 	aug.Posets[pos].Add(e)
 	e.addDependency(aug, pos)
 }
+
+func (aug *AugItem) Equals(other *AugItem) bool {
+	if len(aug.Rule) != len(other.Rule) {
+		return false
 	}
-	item.Posets[pos] = append(item.Posets[pos], e)
-	e.addDependency(item, pos)
+	for i := range aug.Rule {
+		if aug.Rule[i] != other.Rule[i] {
+			return false
+		}
+	}
+	for i := range aug.Posets {
+		if !aug.Posets[i].Equals(other.Posets[i]) {
+			return false
+		}
+	}
+	return true
 }
 
 func newAugItemSet(f Factory, prealloc int) *AugItemSet {
