@@ -67,6 +67,33 @@ func TestAugItem(t *testing.T) {
 }
 
 func TestAugItemSet(t *testing.T) {
+	var f Factory = NewHashFactory()
+	set := f.NewAugItemSet(0)
+	S := ds.NewSimpleVertex("S")
+	a := ds.NewSimpleVertex("a")
+	b := ds.NewSimpleVertex("b")
+	c := ds.NewSimpleVertex("c")
+	one := ds.NewSimpleVertex("1")
+	two := ds.NewSimpleVertex("2")
+
+	rule := []ds.Vertex{S, a, b, c}
+	it := newAugItem(rule, f.NewEmptyPosets(len(rule)))
+	set.Add(it)
+	Assert(t, set.Size() == 1,
+		fmt.Sprintf("Wrong Size(). Want 1, got %v.", set.Size()))
+	it2 := newAugItem(rule, f.NewEmptyPosets(len(rule)))
+	it2.Posets[0].Add(newEdge(one, a, two))
+	set.Add(it2)
+	Assert(t, set.Size() == 1,
+		fmt.Sprintf("Wrong Size(). Want 1, got %v.", set.Size()))
+	Assert(t, set.Get(rule).Equals(it2), "Items should be equal.")
+	Assert(t, set.Get([]ds.Vertex{S}) == nil, "Wrong item. Expected nil.")
+	all := set.GetAll(rule[0])
+	Assert(t, len(all) == 1,
+		fmt.Sprintf("Wrong length. Want 1, got %v.", len(all)))
+	Assert(t, all[0].Equals(it2),
+		fmt.Sprintf("Wrong items. Expected { %v }, got %v", it2, all))
+}
 	f := NewHashFactory()
 	f.NewAugItemSet(0)
 }
