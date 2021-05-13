@@ -14,6 +14,7 @@ type (
 		Contains(ds.Vertex, ds.Vertex, ds.Vertex) bool
 		Iterate() <-chan *Edge
 		Size() int
+		Equals(Graph) bool
 	}
 
 	// HashGraph is a map-based Graph implementation.
@@ -113,6 +114,19 @@ func (g *HashGraph) Size() int {
 func (g *HashGraph) Get(s, X, o ds.Vertex) *Edge {
 	t := triple{s: s, X: X, o: o}
 	return g.data.Get(t.String()).(*Edge)
+}
+
+// Equals checks whether graphs are equal.
+func (g *HashGraph) Equals(other Graph) bool {
+	if g.Size() != other.Size() {
+		return false
+	}
+	for t := range g.Iterate() {
+		if !other.Contains(t.s, t.X, t.o) {
+			return false
+		}
+	}
+	return true
 }
 
 // SimpleToHashGraph creates a HashGraph from a ds.SimpleGraph

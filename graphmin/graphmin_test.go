@@ -56,6 +56,16 @@ func TestHashGraph(t *testing.T) {
 	for e := range g.Iterate() {
 		Assert(t, e == e1 || e == e2, "Wrong edges in iteration.")
 	}
+
+	g2 := newHashGraph()
+	g2.Add(e1)
+	g2.Add(e2)
+	Assert(t, g.Equals(g2), "Graphs should be equal.")
+    g2.Remove(s,p,o)
+    Assert(t, !g.Equals(g2), "Graphs should not be equal.")
+    g2.Add(newEdge(o,p,s))
+    Assert(t, !g.Equals(g2), "Graphs should not be equal.")
+
 }
 
 func TestSimpleToHashGraphConversion(t *testing.T) {
