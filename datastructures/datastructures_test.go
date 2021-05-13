@@ -129,6 +129,8 @@ func testSet(t *testing.T, f Factory) {
 	Assert(t, A.Size() == 4, "A.Size() != 4")
 	Assert(t, A.Contains(four), "A should contain 4.")
 	Assert(t, A.Equals(B), "A should be equal to B.")
+
+	// TODO: test String()
 }
 
 func testGraph(t *testing.T, f Factory) {
