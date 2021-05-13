@@ -2,13 +2,13 @@ package graphmin
 
 import (
 	"fmt"
-	// "github.com/ciromdrs/graph-tools/ccfpq"
 	ds "github.com/ciromdrs/graph-tools/datastructures"
 	. "github.com/ciromdrs/graph-tools/util"
 	"testing"
 )
 
 func TestAugItem(t *testing.T) {
+	var f Factory = NewHashFactory()
 	S := ds.NewSimpleVertex("S")
 	a := ds.NewSimpleVertex("a")
 	b := ds.NewSimpleVertex("b")
@@ -18,7 +18,8 @@ func TestAugItem(t *testing.T) {
 	e1 := newEdge(s, a, o)
 
 	rule := []ds.Vertex{S, a, b, c}
-	item := newAugItem(rule)
+	posets := f.NewEmptyPosets(len(rule))
+	item := newAugItem(rule, posets)
 	if item.Rule[0] != S || item.Rule[1] != a || item.Rule[2] != b ||
 		item.Rule[3] != c {
 		t.Fatalf("Wrong rule. Expected %v, got %v", rule, item.Rule)
@@ -30,10 +31,12 @@ func TestAugItem(t *testing.T) {
 	AssertPanic(t, func() { item.AddEdge(e1, 0) },
 		fmt.Sprintf("Should not add inexistent edge %v.", e1))
 	e1.exists = true
+	AssertPanic(t, func() { item.AddEdge(e1, 0) },
+		fmt.Sprintf("Should not add edge %v with wrong predicate.", e1))
+	e1.exists = true
 	item.AddEdge(e1, 1)
-	if item.Posets[1][0] != e1 {
-		t.Fatalf("Eror adding edge. Expected %v, got %v", e1, item.Posets[1][0])
-	}
+	Assert(t, item.Posets[1].Contains(s, a, o),
+		fmt.Sprintf("Error adding edge. item.Posets[1] should contain %v.", e1))
 	{
 		want := itemPos{item: item, pos: 0}
 		if e1.dependencies[0].item != item || e1.dependencies[0].pos != 1 {
