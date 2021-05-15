@@ -62,7 +62,7 @@ func (t triple) String() string {
 func (e *Edge) addDependency(item *AugItem, pos int) {
 	for _, ip := range e.dependencies {
 		if ip.item == item && ip.pos == pos {
-			panic(fmt.Sprintf("Duplicated dependency (%v,%v).", item, pos))
+			return
 		}
 	}
 	e.dependencies = append(e.dependencies, itemPos{item: item, pos: pos})
@@ -114,7 +114,10 @@ func (g *HashGraph) Size() int {
 // Get returns the Edge object corresponding to (s,X,o).
 func (g *HashGraph) Get(s, X, o ds.Vertex) *Edge {
 	t := triple{s: s, X: X, o: o}
-	return g.data.Get(t.String()).(*Edge)
+	if v := g.data.Get(t.String()); v != nil {
+		return v.(*Edge)
+	}
+	return nil
 }
 
 // Equals checks whether graphs are equal.
