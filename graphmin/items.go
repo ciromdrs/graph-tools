@@ -128,7 +128,10 @@ func (s *AugItemSet) Get(rule []ds.Vertex) *AugItem {
 
 // GetAll returns all AugItems for the given lhs.
 func (s *AugItemSet) GetAll(lhs ds.Vertex) []*AugItem {
-	return s.data.Get(lhs).([]*AugItem)
+	if items := s.data.Get(lhs); items != nil {
+		return items.([]*AugItem)
+	}
+	return nil
 }
 
 // Size returns the number of AugItems.
@@ -153,4 +156,43 @@ func (s *AugItemSet) String() string {
 	}
 	out += " }"
 	return out
+}
+
+// Equals checks whether two AugItemSets are equal by comparing values, not
+// pointers.
+func (s *AugItemSet) Equals(other *AugItemSet) bool {
+	if s.Size() != other.Size() {
+		return false
+	}
+	for it := range s.Iterate() {
+		if !other.Contains(it) {
+			return false
+		}
+	}
+	return true
+}
+
+// Contains checks whether an AugItemSet contains a given AugItem by comparing
+// values, not pointers.
+func (s *AugItemSet) Contains(it *AugItem) bool {
+	if it2 := s.Get(it.Rule); it2 != nil {
+		if it2.Equals(it) {
+			return true
+		}
+	}
+	return false
+}
+
+// Iterate iterates over *AugItems.
+func (s *AugItemSet) Iterate() <-chan *AugItem {
+	ch := make(chan *AugItem)
+	go func() {
+		for kv := range s.data.Iterate() {
+			for _, it := range kv.Value.([]*AugItem) {
+				ch <- it
+			}
+		}
+		defer close(ch)
+	}()
+	return ch
 }

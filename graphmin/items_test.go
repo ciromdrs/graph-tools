@@ -96,7 +96,16 @@ func TestAugItemSet(t *testing.T) {
 		fmt.Sprintf("Wrong length. Want 1, got %v.", len(all)))
 	Assert(t, all[0].Equals(it2),
 		fmt.Sprintf("Wrong items. Expected { %v }, got %v", it2, all))
-}
-	f := NewHashFactory()
-	f.NewAugItemSet(0)
+
+	set2 := f.NewAugItemSet(0)
+	Assert(t, !set.Equals(set2), "AugItemSets should not be equal.")
+	it3 := newAugItem(rule, f.NewEmptyPosets(len(rule)))
+	e2 := newEdge(one, a, three, false, nil, true)
+	it3.AddEdge(e2, 1)
+	Assert(t, !set.Equals(set2), "AugItemSets should not be equal.")
+	set2 = f.NewAugItemSet(0)
+	it3 = newAugItem(rule, f.NewEmptyPosets(len(rule)))
+	it3.AddEdge(e1, 1)
+	set2.Add(it3)
+	Assert(t, set.Equals(set2), "AugItemSets should be equal.")
 }
