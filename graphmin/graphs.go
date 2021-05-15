@@ -43,17 +43,17 @@ type (
 /* Edge methods and functions */
 
 // newEdge creates an Edge object.
-func newEdge(s, X, o ds.Vertex) *Edge {
+func newEdge(s, X, o ds.Vertex, isNecessary bool, dependencies []itemPos,
+	exists bool) *Edge {
 	e := &Edge{
-		isNecessary:  false,
-		dependencies: nil,
-		exists:       false,
+		isNecessary:  isNecessary,
+		dependencies: dependencies,
+		exists:       exists,
 	}
 	e.triple = triple{s: s, X: X, o: o}
 	return e
 }
 
-// Convert triple to string
 func (t triple) String() string {
 	return fmt.Sprintf("(%v, %v, %v)", t.s.String(), t.X.String(), t.o.String())
 }
@@ -133,7 +133,7 @@ func (g *HashGraph) Equals(other Graph) bool {
 func SimpleToHashGraph(simple *ds.SimpleGraph) *HashGraph {
 	hash := newHashGraph()
 	for t := range simple.Iterate() {
-		hash.Add(newEdge(t[0], t[1], t[2]))
+		hash.Add(newEdge(t[0], t[1], t[2], false, nil, true))
 	}
 	return hash
 }

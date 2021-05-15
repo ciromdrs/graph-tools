@@ -15,7 +15,7 @@ func TestAugItem(t *testing.T) {
 	c := ds.NewSimpleVertex("c")
 	s := ds.NewSimpleVertex("s")
 	o := ds.NewSimpleVertex("o")
-	e1 := newEdge(s, a, o)
+	e1 := newEdge(s, a, o, false, nil, true)
 
 	rule := []ds.Vertex{S, a, b, c}
 	AssertPanic(t, func() { newAugItem(rule, f.NewEmptyPosets(len(rule)-1)) },
@@ -48,7 +48,7 @@ func TestAugItem(t *testing.T) {
 	}
 	AssertPanic(t, func() { item.AddEdge(e1, 0) },
 		fmt.Sprintf("Should not add duplicated dependency %v %d.", e1, 0))
-	e2 := newEdge(s, b, o)
+	e2 := newEdge(s, b, o, false, nil, true)
 	e2.exists = true
 	AssertPanic(t, func() { item.AddEdge(e2, 0) },
 		"Should not add edge with wrong predicate b.")
@@ -75,14 +75,17 @@ func TestAugItemSet(t *testing.T) {
 	c := ds.NewSimpleVertex("c")
 	one := ds.NewSimpleVertex("1")
 	two := ds.NewSimpleVertex("2")
+	three := ds.NewSimpleVertex("3")
 
 	rule := []ds.Vertex{S, a, b, c}
 	it := newAugItem(rule, f.NewEmptyPosets(len(rule)))
 	set.Add(it)
 	Assert(t, set.Size() == 1,
 		fmt.Sprintf("Wrong Size(). Want 1, got %v.", set.Size()))
+
 	it2 := newAugItem(rule, f.NewEmptyPosets(len(rule)))
-	it2.Posets[0].Add(newEdge(one, a, two))
+	e1 := newEdge(one, a, two, false, nil, true)
+	it2.AddEdge(e1, 1)
 	set.Add(it2)
 	Assert(t, set.Size() == 1,
 		fmt.Sprintf("Wrong Size(). Want 1, got %v.", set.Size()))

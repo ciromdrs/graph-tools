@@ -12,16 +12,8 @@ func TestEdge(t *testing.T) {
 	s := ds.NewSimpleVertex("s")
 	p := ds.NewSimpleVertex("p")
 	o := ds.NewSimpleVertex("o")
-	e := newEdge(s, p, o)
-	if e.isNecessary {
-		t.Fatalf("New edges should not be necessary.")
-	}
-	if e.exists {
-		t.Fatalf("New edges should not exist.")
-	}
-	if e.dependencies != nil {
-		t.Fatalf("New edges should have no dependencies.")
-	}
+	_ = newEdge(s, p, o, false, nil, true)
+	// TODO: Write actual tests for Edges
 }
 
 func TestHashGraph(t *testing.T) {
@@ -32,7 +24,7 @@ func TestHashGraph(t *testing.T) {
 	s := ds.NewSimpleVertex("s")
 	p := ds.NewSimpleVertex("p")
 	o := ds.NewSimpleVertex("o")
-	e1 := newEdge(s, p, o)
+	e1 := newEdge(s, p, o, false, nil, true)
 
 	Assert(t, !g.Contains(s, p, o), "Should not contain edge.")
 	Assert(t, g.Size() == 0,
@@ -48,7 +40,7 @@ func TestHashGraph(t *testing.T) {
 	Assert(t, g.Size() == 0,
 		fmt.Sprintf("Wrong g.Size(). Expected 0, got %v.", g.Size()))
 
-	e2 := newEdge(s, p, ds.NewSimpleVertex("o2"))
+	e2 := newEdge(s, p, ds.NewSimpleVertex("o2"), false, nil, true)
 	g.Add(e1)
 	g.Add(e2)
 	Assert(t, g.Size() == 2,
@@ -61,10 +53,10 @@ func TestHashGraph(t *testing.T) {
 	g2.Add(e1)
 	g2.Add(e2)
 	Assert(t, g.Equals(g2), "Graphs should be equal.")
-    g2.Remove(s,p,o)
-    Assert(t, !g.Equals(g2), "Graphs should not be equal.")
-    g2.Add(newEdge(o,p,s))
-    Assert(t, !g.Equals(g2), "Graphs should not be equal.")
+	g2.Remove(s, p, o)
+	Assert(t, !g.Equals(g2), "Graphs should not be equal.")
+	g2.Add(newEdge(o, p, s, false, nil, true))
+	Assert(t, !g.Equals(g2), "Graphs should not be equal.")
 
 }
 
