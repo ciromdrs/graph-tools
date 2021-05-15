@@ -59,6 +59,20 @@ func (aug *AugItem) Equals(other *AugItem) bool {
 	return true
 }
 
+func (aug *AugItem) String() string {
+	out := ""
+	first := true
+	for i := range aug.Rule {
+		if first {
+			first = false
+		} else {
+			out += " "
+		}
+		out += aug.Rule[i].Label() + " " + aug.Posets[i].String()
+	}
+	return out
+}
+
 func newAugItemSet(f Factory, prealloc int) *AugItemSet {
 	return &AugItemSet{
 		data: f.NewMap(prealloc),
@@ -122,4 +136,19 @@ func (s *AugItemSet) Size() int {
 		size += len(kv.Value.([]*AugItem))
 	}
 	return size
+}
+
+func (s *AugItemSet) String() string {
+	out := "{ "
+	first := true
+	for item := range s.Iterate() {
+		if first {
+			first = false
+		} else {
+			out += ", "
+		}
+		out += item.String()
+	}
+	out += " }"
+	return out
 }

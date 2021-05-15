@@ -15,6 +15,7 @@ type (
 		Iterate() <-chan *Edge
 		Size() int
 		Equals(Graph) bool
+		String() string
 	}
 
 	// HashGraph is a map-based Graph implementation.
@@ -127,6 +128,10 @@ func (g *HashGraph) Equals(other Graph) bool {
 		}
 	}
 	return true
+}
+
+func (g *HashGraph) String() string {
+	return g.data.String()
 }
 
 // SimpleToHashGraph creates a HashGraph from a ds.SimpleGraph
