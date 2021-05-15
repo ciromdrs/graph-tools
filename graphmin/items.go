@@ -20,7 +20,9 @@ type (
 
 func newAugItem(rule []ds.Vertex, posets []Graph) *AugItem {
 	if len(rule) != len(posets) {
-		panic("Rule and Posets must be of same length.")
+		panic(fmt.Sprintf(
+			"rule (length %v) and posets (length %v) must be of same length.",
+			len(rule), len(posets)))
 	}
 	return &AugItem{
 		Rule:   rule,
